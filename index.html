@@ -1,0 +1,5777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Knowledge Dashboard</title>
+  <style>
+    /* ============================================
+       CSS RESET & BASE STYLES
+       ============================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --color-bg: #ffffff;
+      --color-primary: #4f46e5;
+      --color-primary-light: #6366f1;
+      --color-primary-pale: #eef2ff;
+      --color-secondary: #22c55e;
+      --color-secondary-pale: #f0fdf4;
+      --color-accent: #f59e0b;
+      --color-accent-pale: #fffbeb;
+      --color-danger: #ef4444;
+      --color-danger-pale: #fef2f2;
+      --color-text: #1e293b;
+      --color-text-secondary: #64748b;
+      --color-border: #e2e8f0;
+      --color-surface: #f8fafc;
+      --sidebar-width: 260px;
+      --topbar-height: 60px;
+      --card-radius: 14px;
+      --shadow-soft: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+      --shadow-medium: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      --shadow-lift: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--color-surface);
+      color: var(--color-text);
+      line-height: 1.6;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ============================================
+       APP LAYOUT
+       ============================================ */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ============================================
+       SIDEBAR
+       ============================================ */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      background: var(--color-bg);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      transition: transform var(--transition-normal), opacity var(--transition-normal);
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: var(--topbar-height);
+    }
+
+    .sidebar-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text);
+      line-height: 1.2;
+    }
+
+    .sidebar-subtitle {
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      font-weight: 400;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-secondary);
+      padding: 12px 12px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      user-select: none;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: var(--color-surface);
+      color: var(--color-text);
+    }
+
+    .nav-item.active {
+      background: var(--color-primary-pale);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .nav-item .nav-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 16px;
+    }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--color-border);
+      font-size: 11px;
+      color: var(--color-text-secondary);
+      text-align: center;
+    }
+
+    /* ============================================
+       MAIN CONTENT AREA
+       ============================================ */
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* ============================================
+       TOPBAR
+       ============================================ */
+    .topbar {
+      height: var(--topbar-height);
+      min-height: var(--topbar-height);
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 12px;
+      z-index: 50;
+    }
+
+    .topbar-hamburger {
+      display: none;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-radius: 8px;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text);
+      font-size: 20px;
+      transition: background var(--transition-fast);
+    }
+
+    .topbar-hamburger:hover {
+      background: var(--color-surface);
+    }
+
+    .topbar-page-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-text);
+      white-space: nowrap;
+    }
+
+    .topbar-spacer {
+      flex: 1;
+    }
+
+    .topbar-search {
+      position: relative;
+      max-width: 300px;
+      flex: 1;
+    }
+
+    .topbar-search input {
+      width: 100%;
+      padding: 8px 14px 8px 36px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      font-size: 13px;
+      background: var(--color-surface);
+      color: var(--color-text);
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .topbar-search input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .topbar-search .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-secondary);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ============================================
+       BUTTONS
+       ============================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 9px;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn:hover {
+      background: var(--color-surface);
+      border-color: #cbd5e1;
+    }
+
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-light);
+      border-color: var(--color-primary-light);
+    }
+
+    .btn-success {
+      background: var(--color-secondary);
+      color: white;
+      border-color: var(--color-secondary);
+    }
+
+    .btn-success:hover {
+      background: #16a34a;
+      border-color: #16a34a;
+    }
+
+    .btn-danger {
+      background: var(--color-danger);
+      color: white;
+      border-color: var(--color-danger);
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      border-color: #dc2626;
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 7px;
+    }
+
+    .btn-icon {
+      padding: 8px;
+      min-width: 36px;
+      justify-content: center;
+    }
+
+    .btn .btn-label-mobile {
+      display: inline;
+    }
+
+    /* Edit Mode Toggle */
+    .edit-mode-btn.active {
+      background: var(--color-accent);
+      color: white;
+      border-color: var(--color-accent);
+      animation: editPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes editPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.3); }
+      50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+    }
+
+    /* Edit mode banner */
+    .edit-mode-banner {
+      display: none;
+      background: var(--color-accent-pale);
+      border-bottom: 2px solid var(--color-accent);
+      padding: 8px 24px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #92400e;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .edit-mode-banner.visible {
+      display: flex;
+    }
+
+    .edit-mode-banner .banner-spacer {
+      flex: 1;
+    }
+
+    /* ============================================
+       CONTENT AREA
+       ============================================ */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px;
+      scroll-behavior: smooth;
+    }
+
+    /* Page views - controlled by router */
+    .page-view {
+      display: none;
+      animation: fadeInPage 0.3s ease;
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    @keyframes fadeInPage {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================
+       HOME DASHBOARD CARDS
+       ============================================ */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .dashboard-card {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+      padding: 24px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      border: 1px solid var(--color-border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+      box-shadow: var(--shadow-lift);
+      transform: translateY(-3px);
+      border-color: var(--color-primary-light);
+    }
+
+    .dashboard-card .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+      color: white;
+    }
+
+    .dashboard-card .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--color-text);
+    }
+
+    .dashboard-card .card-desc {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .dashboard-card .card-arrow {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-border);
+      font-size: 18px;
+      transition: all var(--transition-fast);
+    }
+
+    .dashboard-card:hover .card-arrow {
+      color: var(--color-primary);
+      right: 16px;
+    }
+
+    /* ============================================
+       REUSABLE COMPONENT: CARD
+       ============================================ */
+    .component-card {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--color-border);
+      padding: 20px;
+      transition: box-shadow var(--transition-normal);
+    }
+
+    .component-card:hover {
+      box-shadow: var(--shadow-medium);
+    }
+
+    /* ============================================
+       REUSABLE COMPONENT: HEADING
+       ============================================ */
+    .component-heading {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--color-text);
+      margin-bottom: 4px;
+    }
+
+    .component-heading-sub {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+
+    /* ============================================
+       REUSABLE COMPONENT: TEXT BLOCK
+       ============================================ */
+    .component-text-block {
+      font-size: 14px;
+      color: var(--color-text);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .component-text-block[contenteditable="true"] {
+      outline: 2px dashed var(--color-accent);
+      outline-offset: 4px;
+      border-radius: 6px;
+      padding: 8px;
+      background: var(--color-accent-pale);
+    }
+
+    /* ============================================
+       REUSABLE COMPONENT: IMAGE BLOCK
+       ============================================ */
+    .component-image-block {
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--color-surface);
+      position: relative;
+    }
+
+    .component-image-block img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .component-image-block .image-placeholder {
+      width: 100%;
+      min-height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-secondary);
+      font-size: 13px;
+      flex-direction: column;
+      gap: 8px;
+      border: 2px dashed var(--color-border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color var(--transition-fast);
+    }
+
+    .component-image-block .image-placeholder:hover {
+      border-color: var(--color-primary);
+    }
+
+    /* ============================================
+       PLACEHOLDER PAGE (for unbuilt dashboards)
+       ============================================ */
+    .placeholder-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 400px;
+      color: var(--color-text-secondary);
+    }
+
+    .placeholder-content .placeholder-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .placeholder-content h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 8px;
+    }
+
+    .placeholder-content p {
+      font-size: 14px;
+      max-width: 360px;
+      line-height: 1.6;
+    }
+
+    /* ============================================
+       SIDEBAR OVERLAY (mobile)
+       ============================================ */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 90;
+      opacity: 0;
+      transition: opacity var(--transition-normal);
+    }
+
+    .sidebar-overlay.visible {
+      opacity: 1;
+    }
+
+    /* ============================================
+       TOAST NOTIFICATIONS
+       ============================================ */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--color-text);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-medium);
+      pointer-events: auto;
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+      max-width: 340px;
+    }
+
+    .toast.success { background: var(--color-secondary); }
+    .toast.error { background: var(--color-danger); }
+    .toast.warning { background: var(--color-accent); color: #1e293b; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-8px); }
+    }
+
+    /* ============================================
+       MODAL (for import)
+       ============================================ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-lift);
+      padding: 28px;
+      max-width: 440px;
+      width: 90%;
+      animation: modalIn 0.25s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-box h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .modal-box p {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .modal-box .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    /* ============================================
+       CALENDAR STYLES
+       ============================================ */
+
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .cal-header h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--color-text);
+    }
+
+    .cal-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cal-nav-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all var(--transition-fast);
+      color: var(--color-text);
+    }
+
+    .cal-nav-btn:hover {
+      background: var(--color-primary-pale);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .cal-today-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-bg);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all var(--transition-fast);
+      color: var(--color-text);
+    }
+
+    .cal-today-btn:hover {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: white;
+    }
+
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .cal-weekday {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-secondary);
+      padding: 8px 0;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .cal-day {
+      aspect-ratio: 1 / 1;
+      min-height: 70px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      background: var(--color-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cal-day:hover {
+      background: var(--color-primary-pale);
+      border-color: var(--color-primary-light);
+      transform: scale(1.02);
+      z-index: 2;
+    }
+
+    .cal-day.other-month {
+      opacity: 0.35;
+      background: transparent;
+    }
+
+    .cal-day.other-month:hover {
+      opacity: 0.6;
+    }
+
+    .cal-day.today {
+      border-color: var(--color-primary);
+      border-width: 2px;
+      background: var(--color-primary-pale);
+    }
+
+    .cal-day.today .cal-day-number {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .cal-day-number {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-text);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .cal-day-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .cal-day-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-text);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      z-index: 10;
+      pointer-events: none;
+      box-shadow: var(--shadow-medium);
+    }
+
+    .cal-day-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--color-text);
+    }
+
+    .cal-day:hover .cal-day-tooltip {
+      display: block;
+    }
+
+    /* ============================================
+       CALENDAR ENTRY VIEW
+       ============================================ */
+    .cal-entry-view {
+      display: none;
+      animation: fadeInPage 0.3s ease;
+    }
+
+    .cal-entry-view.active {
+      display: block;
+    }
+
+    .cal-entry-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .cal-entry-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-bg);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      color: var(--color-text);
+    }
+
+    .cal-entry-back-btn:hover {
+      background: var(--color-primary-pale);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .cal-entry-date-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--color-text);
+    }
+
+    .cal-entry-date-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--color-primary-pale);
+      color: var(--color-primary);
+    }
+
+    /* Editor toolbar — shared between calendar & knowledge blocks */
+    .editor-toolbar {
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    body[data-edit-mode="true"] .editor-toolbar {
+      display: flex;
+    }
+
+    .toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 13px;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      background: var(--color-bg);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      color: var(--color-text);
+    }
+
+    .toolbar-btn:hover {
+      background: var(--color-primary-pale);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    /* Content blocks container — shared */
+    .blocks-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .blocks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Individual content block wrapper — shared */
+    .content-block {
+      position: relative;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--card-radius);
+      padding: 20px;
+      transition: all var(--transition-fast);
+    }
+
+    .content-block:hover {
+      box-shadow: var(--shadow-soft);
+    }
+
+    .content-block.dragging {
+      opacity: 0.5;
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .content-block.drag-over {
+      border-color: var(--color-primary);
+      border-style: dashed;
+      background: var(--color-primary-pale);
+    }
+
+    /* Block controls — shared */
+    .block-controls {
+      display: none;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      gap: 4px;
+      z-index: 5;
+    }
+
+    body[data-edit-mode="true"] .block-controls {
+      display: flex;
+    }
+
+    .block-ctrl-btn {
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--color-border);
+      border-radius: 7px;
+      background: var(--color-bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: all var(--transition-fast);
+      color: var(--color-text-secondary);
+    }
+
+    .block-ctrl-btn:hover {
+      background: var(--color-danger-pale);
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+    }
+
+    .block-ctrl-btn.drag-handle {
+      cursor: grab;
+    }
+
+    .block-ctrl-btn.drag-handle:hover {
+      background: var(--color-primary-pale);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .block-ctrl-btn.drag-handle:active {
+      cursor: grabbing;
+    }
+
+    /* Block type: Heading — shared */
+    .block-heading {
+      font-weight: 800;
+      color: var(--color-text);
+      outline: none;
+      word-break: break-word;
+    }
+
+    .block-heading.size-h1 { font-size: 24px; }
+    .block-heading.size-h2 { font-size: 20px; }
+    .block-heading.size-h3 { font-size: 17px; }
+
+    body[data-edit-mode="true"] .block-heading[contenteditable="true"] {
+      border-bottom: 2px dashed var(--color-accent);
+      padding-bottom: 4px;
+    }
+
+    /* Block type: Text — shared */
+    .block-text {
+      font-size: 14px;
+      color: var(--color-text);
+      line-height: 1.8;
+      white-space: pre-wrap;
+      outline: none;
+      word-break: break-word;
+      min-height: 24px;
+    }
+
+    body[data-edit-mode="true"] .block-text[contenteditable="true"] {
+      border: 1px dashed var(--color-accent);
+      border-radius: 6px;
+      padding: 10px;
+      background: var(--color-accent-pale);
+    }
+
+    /* Block type: Image — shared */
+    .block-image img {
+      width: 100%;
+      border-radius: 10px;
+      display: block;
+    }
+
+    .block-image-caption {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      text-align: center;
+      margin-top: 8px;
+      font-style: italic;
+      outline: none;
+    }
+
+    body[data-edit-mode="true"] .block-image-caption[contenteditable="true"] {
+      border-bottom: 1px dashed var(--color-accent);
+      padding-bottom: 2px;
+    }
+
+    .image-upload-zone {
+      min-height: 160px;
+      border: 2px dashed var(--color-border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      color: var(--color-text-secondary);
+      font-size: 13px;
+      background: var(--color-surface);
+    }
+
+    .image-upload-zone:hover {
+      border-color: var(--color-primary);
+      background: var(--color-primary-pale);
+    }
+
+    .image-upload-zone .upload-icon {
+      font-size: 28px;
+    }
+
+    /* Block type: Image Gallery — shared */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 1/1;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all var(--transition-fast);
+    }
+
+    .gallery-item:hover {
+      border-color: var(--color-primary);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .gallery-item .gallery-remove-btn {
+      display: none;
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-danger);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body[data-edit-mode="true"] .gallery-item .gallery-remove-btn {
+      display: flex;
+    }
+
+    .gallery-add-btn {
+      aspect-ratio: 1/1;
+      border: 2px dashed var(--color-border);
+      border-radius: 10px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      color: var(--color-text-secondary);
+      font-size: 11px;
+      background: var(--color-surface);
+    }
+
+    body[data-edit-mode="true"] .gallery-add-btn {
+      display: flex;
+    }
+
+    .gallery-add-btn:hover {
+      border-color: var(--color-primary);
+      background: var(--color-primary-pale);
+    }
+
+    /* Block type: Image Box — shared */
+    .image-box {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .image-box-img {
+      width: 200px;
+      min-width: 200px;
+      border-radius: 10px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .image-box-img img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .image-box-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .image-box-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 8px;
+      outline: none;
+      word-break: break-word;
+    }
+
+    .image-box-desc {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+      outline: none;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    body[data-edit-mode="true"] .image-box-title[contenteditable="true"],
+    body[data-edit-mode="true"] .image-box-desc[contenteditable="true"] {
+      border-bottom: 1px dashed var(--color-accent);
+      padding-bottom: 2px;
+    }
+
+    /* Block type: Divider — shared */
+    .block-divider {
+      border: none;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+      margin: 8px 0;
+    }
+
+    /* Empty state — shared */
+    .entry-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 250px;
+      color: var(--color-text-secondary);
+      text-align: center;
+    }
+
+    .entry-empty .empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    .entry-empty h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+
+    .entry-empty p {
+      font-size: 13px;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    /* Image lightbox overlay */
+    .lightbox-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 600;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-out;
+    }
+
+    .lightbox-overlay.visible {
+      display: flex;
+    }
+
+    .lightbox-overlay img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+
+    /* ============================================
+       KNOWLEDGE BLOCKS — GRID VIEW
+       ============================================ */
+
+    .kb-grid-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .kb-grid-actions .kb-count {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    .kb-create-btn {
+      display: none;
+    }
+
+    body[data-edit-mode="true"] .kb-create-btn {
+      display: inline-flex;
+    }
+
+    .kb-card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .kb-card {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      position: relative;
+    }
+
+    .kb-card:hover {
+      box-shadow: var(--shadow-lift);
+      transform: translateY(-3px);
+      border-color: var(--color-primary-light);
+    }
+
+    .kb-card.dragging {
+      opacity: 0.5;
+      box-shadow: var(--shadow-lift);
+    }
+
+    .kb-card.drag-over {
+      border-color: var(--color-primary);
+      border-style: dashed;
+      background: var(--color-primary-pale);
+    }
+
+    .kb-card-cover {
+      width: 100%;
+      height: 140px;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--color-primary-pale), var(--color-surface));
+      position: relative;
+    }
+
+    .kb-card-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .kb-card-cover .kb-cover-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      opacity: 0.3;
+    }
+
+    .kb-card-delete {
+      display: none;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-danger);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      box-shadow: var(--shadow-soft);
+      transition: all var(--transition-fast);
+    }
+
+    .kb-card-delete:hover {
+      background: #dc2626;
+      transform: scale(1.1);
+    }
+
+    body[data-edit-mode="true"] .kb-card-delete {
+      display: flex;
+    }
+
+    .kb-card-drag {
+      display: none;
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+      cursor: grab;
+      font-size: 14px;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      box-shadow: var(--shadow-soft);
+      transition: all var(--transition-fast);
+    }
+
+    .kb-card-drag:hover {
+      background: var(--color-primary-pale);
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    .kb-card-drag:active {
+      cursor: grabbing;
+    }
+
+    body[data-edit-mode="true"] .kb-card-drag {
+      display: flex;
+    }
+
+    .kb-card-body {
+      padding: 16px;
+    }
+
+    .kb-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 6px;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .kb-card-preview {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 12px;
+      min-height: 36px;
+    }
+
+    .kb-card-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-primary);
+      padding: 5px 12px;
+      border: 1px solid var(--color-primary-pale);
+      border-radius: 7px;
+      background: var(--color-primary-pale);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .kb-card-open:hover {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .kb-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 350px;
+      color: var(--color-text-secondary);
+    }
+
+    .kb-empty-state .empty-icon {
+      font-size: 56px;
+      margin-bottom: 12px;
+      opacity: 0.35;
+    }
+
+    .kb-empty-state h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+
+    .kb-empty-state p {
+      font-size: 13px;
+      max-width: 340px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    /* ============================================
+       KNOWLEDGE BLOCKS — EDITOR VIEW
+       ============================================ */
+    .kb-editor-view {
+      display: none;
+      animation: fadeInPage 0.3s ease;
+    }
+
+    .kb-editor-view.active {
+      display: block;
+    }
+
+    .kb-editor-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .kb-editor-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      background: var(--color-bg);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all var(--transition-fast);
+      color: var(--color-text);
+    }
+
+    .kb-editor-back-btn:hover {
+      background: var(--color-primary-pale);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .kb-editor-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--color-text);
+      outline: none;
+      word-break: break-word;
+      flex: 1;
+      min-width: 0;
+    }
+
+    body[data-edit-mode="true"] .kb-editor-title[contenteditable="true"] {
+      border-bottom: 2px dashed var(--color-accent);
+      padding-bottom: 4px;
+    }
+
+    .kb-cover-section {
+      margin-bottom: 24px;
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .kb-cover-image {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      display: block;
+      border-radius: var(--card-radius);
+    }
+
+    .kb-cover-placeholder-big {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, var(--color-primary-pale), var(--color-surface));
+      border-radius: var(--card-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      opacity: 0.4;
+      border: 2px dashed var(--color-border);
+    }
+
+    .kb-cover-change-btn {
+      display: none;
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+    }
+
+    body[data-edit-mode="true"] .kb-cover-change-btn {
+      display: inline-flex;
+    }
+
+    /* ============================================
+       CONFIRM MODAL (for delete confirmation)
+       ============================================ */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .confirm-overlay.visible {
+      display: flex;
+    }
+
+    .confirm-box {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-lift);
+      padding: 28px;
+      max-width: 380px;
+      width: 90%;
+      animation: modalIn 0.25s ease;
+      text-align: center;
+    }
+
+    .confirm-box .confirm-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .confirm-box h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .confirm-box p {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .confirm-box .confirm-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* ============================================
+       PROMPT LIBRARY — STYLES
+       ============================================ */
+
+    /* Top actions bar */
+    .pl-actions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pl-actions-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pl-count {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    .pl-create-btn {
+      display: none;
+    }
+
+    body[data-edit-mode="true"] .pl-create-btn {
+      display: inline-flex;
+    }
+
+    /* Layout switcher */
+    .pl-layout-switcher {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 3px;
+    }
+
+    .pl-layout-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pl-layout-btn.active {
+      background: var(--color-bg);
+      color: var(--color-primary);
+      box-shadow: var(--shadow-soft);
+      font-weight: 600;
+    }
+
+    .pl-layout-btn:hover:not(.active) {
+      color: var(--color-text);
+    }
+
+    /* Horizontal layout cards */
+    .pl-horizontal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .pl-h-card {
+      display: flex;
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      transition: all var(--transition-normal);
+      position: relative;
+    }
+
+    .pl-h-card:hover {
+      box-shadow: var(--shadow-lift);
+      transform: translateY(-2px);
+      border-color: var(--color-primary-light);
+    }
+
+    .pl-h-card.dragging {
+      opacity: 0.5;
+      box-shadow: var(--shadow-lift);
+    }
+
+    .pl-h-card.drag-over {
+      border-color: var(--color-primary);
+      border-style: dashed;
+      background: var(--color-primary-pale);
+    }
+
+    .pl-h-card-image {
+      width: 200px;
+      min-width: 200px;
+      min-height: 140px;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--color-accent-pale), var(--color-surface));
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .pl-h-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .pl-h-card-image .pl-img-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      opacity: 0.3;
+    }
+
+    .pl-h-card-body {
+      flex: 1;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .pl-h-card-text {
+      font-size: 14px;
+      color: var(--color-text);
+      line-height: 1.7;
+      flex: 1;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+
+    .pl-h-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Edit-only card controls */
+    .pl-card-edit-controls {
+      display: none;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      gap: 4px;
+      z-index: 5;
+    }
+
+    body[data-edit-mode="true"] .pl-card-edit-controls {
+      display: flex;
+    }
+
+    .pl-card-ctrl-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--color-border);
+      background: rgba(255,255,255,0.9);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transition: all var(--transition-fast);
+      color: var(--color-text-secondary);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .pl-card-ctrl-btn:hover {
+      background: var(--color-danger-pale);
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+    }
+
+    .pl-card-ctrl-btn.drag-handle {
+      cursor: grab;
+    }
+
+    .pl-card-ctrl-btn.drag-handle:hover {
+      background: var(--color-primary-pale);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .pl-card-ctrl-btn.drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .pl-card-ctrl-btn.edit-btn:hover {
+      background: var(--color-accent-pale);
+      border-color: var(--color-accent);
+      color: #92400e;
+    }
+
+    /* Grid layout */
+    .pl-grid-container {
+      display: none;
+    }
+
+    .pl-grid-container.active {
+      display: block;
+    }
+
+    .pl-horizontal-container.active {
+      display: block;
+    }
+
+    .pl-horizontal-container {
+      display: none;
+    }
+
+    /* Grid column selector */
+    .pl-grid-col-selector {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .pl-grid-col-btn {
+      padding: 5px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: 7px;
+      background: var(--color-bg);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      transition: all var(--transition-fast);
+    }
+
+    .pl-grid-col-btn.active {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .pl-grid-col-btn:hover:not(.active) {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .pl-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .pl-grid.cols-5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .pl-g-card {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      position: relative;
+    }
+
+    .pl-g-card:hover {
+      box-shadow: var(--shadow-lift);
+      transform: translateY(-3px);
+      border-color: var(--color-primary-light);
+    }
+
+    .pl-g-card-image {
+      width: 100%;
+      height: 160px;
+      overflow: hidden;
+      background: linear-gradient(135deg, var(--color-accent-pale), var(--color-surface));
+      position: relative;
+    }
+
+    .pl-g-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .pl-g-card-image .pl-img-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      opacity: 0.3;
+    }
+
+    .pl-g-card-body {
+      padding: 12px 14px;
+    }
+
+    .pl-g-card-preview {
+      font-size: 12px;
+      color: var(--color-text);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 10px;
+      min-height: 36px;
+      word-break: break-word;
+    }
+
+    .pl-g-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Prompt expand modal */
+    .prompt-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .prompt-modal-overlay.visible {
+      display: flex;
+    }
+
+    .prompt-modal-box {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-lift);
+      max-width: 700px;
+      width: 100%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      animation: modalIn 0.25s ease;
+      overflow: hidden;
+    }
+
+    .prompt-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .prompt-modal-header h3 {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .prompt-modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--color-surface);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+
+    .prompt-modal-close:hover {
+      background: var(--color-danger-pale);
+      color: var(--color-danger);
+    }
+
+    .prompt-modal-image {
+      width: 100%;
+      max-height: 260px;
+      overflow: hidden;
+      background: var(--color-surface);
+    }
+
+    .prompt-modal-image img {
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .prompt-modal-text {
+      padding: 20px 24px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--color-text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 100px;
+    }
+
+    .prompt-modal-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Prompt editor modal */
+    .prompt-editor-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .prompt-editor-overlay.visible {
+      display: flex;
+    }
+
+    .prompt-editor-box {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-lift);
+      max-width: 560px;
+      width: 100%;
+      animation: modalIn 0.25s ease;
+      padding: 28px;
+    }
+
+    .prompt-editor-box h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .prompt-editor-box label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+
+    .prompt-editor-box textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 12px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--color-text);
+      background: var(--color-surface);
+      resize: vertical;
+      outline: none;
+      transition: border-color var(--transition-fast);
+    }
+
+    .prompt-editor-box textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .prompt-editor-img-preview {
+      width: 100%;
+      height: 120px;
+      border: 2px dashed var(--color-border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: border-color var(--transition-fast);
+      background: var(--color-surface);
+    }
+
+    .prompt-editor-img-preview:hover {
+      border-color: var(--color-primary);
+    }
+
+    .prompt-editor-img-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .prompt-editor-img-preview .pe-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-text-secondary);
+      font-size: 12px;
+    }
+
+    .prompt-editor-img-preview .pe-placeholder span:first-child {
+      font-size: 24px;
+    }
+
+    .prompt-editor-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    /* Prompt empty state */
+    .pl-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 350px;
+      color: var(--color-text-secondary);
+    }
+
+    .pl-empty-state .empty-icon {
+      font-size: 56px;
+      margin-bottom: 12px;
+      opacity: 0.35;
+    }
+
+    .pl-empty-state h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+
+    .pl-empty-state p {
+      font-size: 13px;
+      max-width: 340px;
+      line-height: 1.5;
+    }
+
+    /* ============================================
+       TOOLS DASHBOARD — STYLES
+       ============================================ */
+
+    .tools-actions-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tools-count {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+
+    .tools-create-btn {
+      display: none;
+    }
+
+    body[data-edit-mode="true"] .tools-create-btn {
+      display: inline-flex;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    .tool-card {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--color-border);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card:hover {
+      box-shadow: var(--shadow-lift);
+      transform: translateY(-3px) scale(1.02);
+      border-color: var(--color-primary-light);
+    }
+
+    .tool-card.dragging {
+      opacity: 0.5;
+      box-shadow: var(--shadow-lift);
+    }
+
+    .tool-card.drag-over {
+      border-color: var(--color-primary);
+      border-style: dashed;
+      background: var(--color-primary-pale);
+    }
+
+    .tool-card-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--color-danger-pale), var(--color-surface));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .tool-card-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 14px;
+    }
+
+    .tool-card-icon .tool-icon-placeholder {
+      font-size: 28px;
+      opacity: 0.5;
+    }
+
+    .tool-card-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+      word-break: break-word;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Tool card edit controls */
+    .tool-card-edit-controls {
+      display: none;
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      gap: 3px;
+      z-index: 5;
+    }
+
+    body[data-edit-mode="true"] .tool-card-edit-controls {
+      display: flex;
+    }
+
+    .tool-ctrl-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid var(--color-border);
+      background: rgba(255,255,255,0.9);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      transition: all var(--transition-fast);
+      color: var(--color-text-secondary);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .tool-ctrl-btn:hover {
+      background: var(--color-danger-pale);
+      border-color: var(--color-danger);
+      color: var(--color-danger);
+    }
+
+    .tool-ctrl-btn.drag-handle {
+      cursor: grab;
+    }
+
+    .tool-ctrl-btn.drag-handle:hover {
+      background: var(--color-primary-pale);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .tool-ctrl-btn.drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .tool-ctrl-btn.edit-btn:hover {
+      background: var(--color-accent-pale);
+      border-color: var(--color-accent);
+      color: #92400e;
+    }
+
+    /* Tool editor modal */
+    .tool-editor-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .tool-editor-overlay.visible {
+      display: flex;
+    }
+
+    .tool-editor-box {
+      background: var(--color-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-lift);
+      max-width: 440px;
+      width: 100%;
+      animation: modalIn 0.25s ease;
+      padding: 28px;
+    }
+
+    .tool-editor-box h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .tool-editor-box label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+
+    .tool-editor-box input[type="text"],
+    .tool-editor-box input[type="url"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--color-text);
+      background: var(--color-surface);
+      outline: none;
+      margin-bottom: 14px;
+      transition: border-color var(--transition-fast);
+    }
+
+    .tool-editor-box input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .tool-editor-icon-preview {
+      width: 80px;
+      height: 80px;
+      border: 2px dashed var(--color-border);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+      overflow: hidden;
+      transition: border-color var(--transition-fast);
+      background: var(--color-surface);
+    }
+
+    .tool-editor-icon-preview:hover {
+      border-color: var(--color-primary);
+    }
+
+    .tool-editor-icon-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .tool-editor-icon-preview .te-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--color-text-secondary);
+      font-size: 10px;
+    }
+
+    .tool-editor-icon-preview .te-placeholder span:first-child {
+      font-size: 24px;
+    }
+
+    .tool-editor-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    /* Tools empty state */
+    .tools-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 350px;
+      color: var(--color-text-secondary);
+    }
+
+    .tools-empty-state .empty-icon {
+      font-size: 56px;
+      margin-bottom: 12px;
+      opacity: 0.35;
+    }
+
+    .tools-empty-state h3 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+
+    .tools-empty-state p {
+      font-size: 13px;
+      max-width: 340px;
+      line-height: 1.5;
+    }
+
+    /* ============================================
+       RESPONSIVE - MOBILE
+       ============================================ */
+    @media (max-width: 1200px) {
+      .kb-card-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .tools-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .pl-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .kb-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .tools-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .pl-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .pl-h-card-image {
+        width: 150px;
+        min-width: 150px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+        box-shadow: var(--shadow-lift);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay {
+        display: block;
+        pointer-events: none;
+      }
+
+      .sidebar-overlay.visible {
+        pointer-events: auto;
+      }
+
+      .topbar-hamburger {
+        display: flex;
+      }
+
+      .content-area {
+        padding: 20px 16px;
+      }
+
+      .topbar {
+        padding: 0 16px;
+      }
+
+      .btn .btn-label-mobile {
+        display: none;
+      }
+
+      .topbar-search {
+        max-width: 160px;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cal-day {
+        min-height: 44px;
+        aspect-ratio: auto;
+        padding: 4px;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .cal-day-number {
+        font-size: 12px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .cal-day-dot {
+        bottom: 3px;
+        width: 5px;
+        height: 5px;
+      }
+
+      .cal-day-tooltip {
+        display: none !important;
+      }
+
+      .image-box {
+        flex-direction: column;
+      }
+
+      .image-box-img {
+        width: 100%;
+        min-width: auto;
+      }
+
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      }
+
+      .kb-card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pl-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      .pl-h-card {
+        flex-direction: column;
+      }
+
+      .pl-h-card-image {
+        width: 100%;
+        min-width: auto;
+        min-height: 120px;
+        max-height: 180px;
+      }
+
+      .prompt-modal-box {
+        max-width: 95%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar-search {
+        display: none;
+      }
+      .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .pl-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* ============================================
+       HIDDEN FILE INPUT
+       ============================================ */
+    .hidden-input {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       APP CONTAINER
+       ========================================== -->
+  <div class="app-container" id="appContainer">
+
+    <!-- ========================================
+         SIDEBAR OVERLAY (mobile)
+         ======================================== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ========================================
+         SIDEBAR
+         ======================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">⚡</div>
+        <div>
+          <div class="sidebar-title">Knowledge Hub</div>
+          <div class="sidebar-subtitle">Personal Dashboard</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Navigation</div>
+
+        <div class="nav-item active" data-page="home" onclick="App.Router.navigate('home')">
+          <span class="nav-icon">🏠</span>
+          <span>Home Dashboard</span>
+        </div>
+
+        <div class="nav-item" data-page="calendar" onclick="App.Router.navigate('calendar')">
+          <span class="nav-icon">📅</span>
+          <span>Calendar</span>
+        </div>
+
+        <div class="nav-item" data-page="knowledge" onclick="App.Router.navigate('knowledge')">
+          <span class="nav-icon">📚</span>
+          <span>Knowledge Blocks</span>
+        </div>
+
+        <div class="nav-item" data-page="prompts" onclick="App.Router.navigate('prompts')">
+          <span class="nav-icon">💬</span>
+          <span>Prompt Library</span>
+        </div>
+
+        <div class="nav-item" data-page="tools" onclick="App.Router.navigate('tools')">
+          <span class="nav-icon">🛠️</span>
+          <span>Tools</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        Knowledge Dashboard v1.0
+      </div>
+    </aside>
+
+    <!-- ========================================
+         MAIN AREA
+         ======================================== -->
+    <main class="main-area">
+
+      <!-- TOPBAR -->
+      <header class="topbar" id="topbar">
+        <button class="topbar-hamburger" id="hamburgerBtn" onclick="App.UI.toggleSidebar()">☰</button>
+        <span class="topbar-page-title" id="topbarTitle">Home Dashboard</span>
+        <div class="topbar-spacer"></div>
+
+        <div class="topbar-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search..." id="searchInput" />
+        </div>
+
+        <div class="topbar-actions">
+          <button class="btn btn-sm edit-mode-btn" id="editModeBtn" onclick="App.EditMode.toggle()">
+            <span>✏️</span>
+            <span class="btn-label-mobile">Edit</span>
+          </button>
+          <button class="btn btn-sm" onclick="App.DataIO.exportData()" title="Export Data">
+            <span>📤</span>
+            <span class="btn-label-mobile">Export</span>
+          </button>
+          <button class="btn btn-sm" onclick="App.DataIO.showImportModal()" title="Import Data">
+            <span>📥</span>
+            <span class="btn-label-mobile">Import</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- EDIT MODE BANNER -->
+      <div class="edit-mode-banner" id="editModeBanner">
+        <span>✏️</span>
+        <span>Edit Mode Active — Changes auto-save as you edit.</span>
+        <div class="banner-spacer"></div>
+        <button class="btn btn-sm btn-success" onclick="App.EditMode.save()">💾 Save</button>
+        <button class="btn btn-sm btn-danger" onclick="App.EditMode.cancel()">✕ Cancel</button>
+      </div>
+
+      <!-- CONTENT AREA -->
+      <div class="content-area" id="contentArea">
+
+        <!-- ====================================
+             PAGE: HOME DASHBOARD
+             ==================================== -->
+        <section class="page-view active" id="page-home">
+          <h1 class="component-heading">Welcome Back 👋</h1>
+          <p class="component-heading-sub">Your personal knowledge dashboard. Choose a section to get started.</p>
+
+          <div class="dashboard-grid" id="homeGrid">
+          </div>
+        </section>
+
+        <!-- ====================================
+             PAGE: CALENDAR
+             ==================================== -->
+        <section class="page-view" id="page-calendar">
+
+          <!-- Calendar Grid View -->
+          <div id="calendarGridView">
+            <h1 class="component-heading">📅 Calendar</h1>
+            <p class="component-heading-sub">Click any date to view or add knowledge entries.</p>
+
+            <div class="cal-header">
+              <h2 id="calMonthTitle"></h2>
+              <div class="cal-nav">
+                <button class="cal-today-btn" onclick="App.Calendar.goToday()">Today</button>
+                <button class="cal-nav-btn" onclick="App.Calendar.prevMonth()">◀</button>
+                <button class="cal-nav-btn" onclick="App.Calendar.nextMonth()">▶</button>
+              </div>
+            </div>
+
+            <div class="cal-weekdays" id="calWeekdays"></div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+
+          <!-- Calendar Entry Detail View -->
+          <div class="cal-entry-view" id="calEntryView">
+            <div class="cal-entry-header">
+              <button class="cal-entry-back-btn" onclick="App.CalendarEditor.backToCalendar()">
+                ← Back to Calendar
+              </button>
+              <h1 class="cal-entry-date-title" id="calEntryTitle"></h1>
+              <span class="cal-entry-date-badge" id="calEntryBadge"></span>
+            </div>
+
+            <!-- Editor toolbar -->
+            <div class="editor-toolbar" id="calEditorToolbar">
+              <button class="toolbar-btn" onclick="App.CalendarEditor.addBlock('heading')">📝 Heading</button>
+              <button class="toolbar-btn" onclick="App.CalendarEditor.addBlock('text')">📄 Text Box</button>
+              <button class="toolbar-btn" onclick="App.CalendarEditor.addBlock('image')">🖼️ Image</button>
+              <button class="toolbar-btn" onclick="App.CalendarEditor.addBlock('gallery')">🎨 Gallery</button>
+              <button class="toolbar-btn" onclick="App.CalendarEditor.addBlock('imagebox')">📦 Image Box</button>
+              <button class="toolbar-btn" onclick="App.CalendarEditor.addBlock('divider')">➖ Divider</button>
+            </div>
+
+            <div class="blocks-container">
+              <div class="blocks-list" id="calBlocksList">
+              </div>
+              <div class="entry-empty" id="calEntryEmpty">
+                <div class="empty-icon">📝</div>
+                <h3>No content yet</h3>
+                <p>Enable edit mode and use the toolbar to add headings, text, images, and more.</p>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================
+             PAGE: KNOWLEDGE BLOCKS
+             ==================================== -->
+        <section class="page-view" id="page-knowledge">
+
+          <!-- Knowledge Blocks Grid View -->
+          <div id="kbGridView">
+            <h1 class="component-heading">📚 Knowledge Blocks</h1>
+            <p class="component-heading-sub">Organize information into topic-based blocks. Each block is a container for structured knowledge.</p>
+
+            <div class="kb-grid-actions">
+              <span class="kb-count" id="kbBlockCount">0 blocks</span>
+              <button class="btn btn-sm btn-primary kb-create-btn" onclick="App.KnowledgeBlocks.createBlock()">
+                ➕ New Block
+              </button>
+            </div>
+
+            <div class="kb-card-grid" id="kbCardGrid">
+            </div>
+
+            <div class="kb-empty-state" id="kbEmptyState" style="display:none;">
+              <div class="empty-icon">📚</div>
+              <h3>No Knowledge Blocks Yet</h3>
+              <p>Enable edit mode and click "New Block" to create your first knowledge block.</p>
+            </div>
+          </div>
+
+          <!-- Knowledge Block Editor View -->
+          <div class="kb-editor-view" id="kbEditorView">
+            <div class="kb-editor-header">
+              <button class="kb-editor-back-btn" onclick="App.KBEditor.backToGrid()">
+                ← Back to Blocks
+              </button>
+              <h1 class="kb-editor-title" id="kbEditorTitle" contenteditable="false">Block Title</h1>
+            </div>
+
+            <!-- Cover image section -->
+            <div class="kb-cover-section" id="kbCoverSection">
+              <div id="kbCoverDisplay">
+                <div class="kb-cover-placeholder-big" id="kbCoverPlaceholder">📚</div>
+              </div>
+              <button class="btn btn-sm kb-cover-change-btn" id="kbCoverChangeBtn" onclick="App.KBEditor.changeCoverImage()">
+                🖼️ Change Cover
+              </button>
+            </div>
+
+            <!-- Editor toolbar -->
+            <div class="editor-toolbar" id="kbEditorToolbar">
+              <button class="toolbar-btn" onclick="App.KBEditor.addBlock('heading')">📝 Heading</button>
+              <button class="toolbar-btn" onclick="App.KBEditor.addBlock('text')">📄 Text Box</button>
+              <button class="toolbar-btn" onclick="App.KBEditor.addBlock('image')">🖼️ Image</button>
+              <button class="toolbar-btn" onclick="App.KBEditor.addBlock('gallery')">🎨 Gallery</button>
+              <button class="toolbar-btn" onclick="App.KBEditor.addBlock('imagebox')">📦 Image Box</button>
+              <button class="toolbar-btn" onclick="App.KBEditor.addBlock('divider')">➖ Divider</button>
+            </div>
+
+            <!-- Content blocks area -->
+            <div class="blocks-container">
+              <div class="blocks-list" id="kbBlocksList">
+              </div>
+              <div class="entry-empty" id="kbEntryEmpty">
+                <div class="empty-icon">📝</div>
+                <h3>No content yet</h3>
+                <p>Enable edit mode and use the toolbar to add headings, text, images, and more.</p>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================
+             PAGE: PROMPT LIBRARY
+             ==================================== -->
+        <section class="page-view" id="page-prompts">
+          <h1 class="component-heading">💬 Prompt Library</h1>
+          <p class="component-heading-sub">Store and organize prompts with images. Copy prompts quickly or expand for full view.</p>
+
+          <div class="pl-actions-bar">
+            <div class="pl-actions-left">
+              <span class="pl-count" id="plCount">0 prompts</span>
+              <button class="btn btn-sm btn-primary pl-create-btn" onclick="App.PromptLibrary.openEditor()">
+                ➕ New Prompt
+              </button>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;">
+              <!-- Layout Switcher -->
+              <div class="pl-layout-switcher">
+                <button class="pl-layout-btn active" data-layout="horizontal" onclick="App.PromptLibrary.setLayout('horizontal')">
+                  ☰ List
+                </button>
+                <button class="pl-layout-btn" data-layout="grid" onclick="App.PromptLibrary.setLayout('grid')">
+                  ▦ Grid
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Horizontal Layout Container -->
+          <div class="pl-horizontal-container active" id="plHorizontalContainer">
+            <div class="pl-horizontal-list" id="plHorizontalList"></div>
+          </div>
+
+          <!-- Grid Layout Container -->
+          <div class="pl-grid-container" id="plGridContainer">
+            <div class="pl-grid-col-selector">
+              <span style="font-size:12px;color:var(--color-text-secondary);margin-right:6px;">Columns:</span>
+              <button class="pl-grid-col-btn active" data-cols="4" onclick="App.PromptLibrary.setGridCols(4)">4</button>
+              <button class="pl-grid-col-btn" data-cols="5" onclick="App.PromptLibrary.setGridCols(5)">5</button>
+            </div>
+            <div class="pl-grid" id="plGrid"></div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="pl-empty-state" id="plEmptyState" style="display:none;">
+            <div class="empty-icon">💬</div>
+            <h3>No Prompts Yet</h3>
+            <p>Enable edit mode and click "New Prompt" to add your first prompt with an image.</p>
+          </div>
+        </section>
+
+        <!-- ====================================
+             PAGE: TOOLS
+             ==================================== -->
+        <section class="page-view" id="page-tools">
+          <h1 class="component-heading">🛠️ Tools</h1>
+          <p class="component-heading-sub">Quick access to your favorite tools. Click a tool to open its URL.</p>
+
+          <div class="tools-actions-bar">
+            <span class="tools-count" id="toolsCount">0 tools</span>
+            <button class="btn btn-sm btn-primary tools-create-btn" onclick="App.ToolsDashboard.openEditor()">
+              ➕ Add Tool
+            </button>
+          </div>
+
+          <div class="tools-grid" id="toolsGrid"></div>
+
+          <div class="tools-empty-state" id="toolsEmptyState" style="display:none;">
+            <div class="empty-icon">🛠️</div>
+            <h3>No Tools Yet</h3>
+            <p>Enable edit mode and click "Add Tool" to bookmark your first tool with a custom icon.</p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ==========================================
+       IMPORT MODAL
+       ========================================== -->
+  <div class="modal-overlay" id="importModal">
+    <div class="modal-box">
+      <h3>📥 Import Data</h3>
+      <p>Select a JSON backup file to restore your dashboard data. This will merge with existing data.</p>
+      <input type="file" accept=".json" class="hidden-input" id="importFileInput" />
+      <div style="border:2px dashed var(--color-border); border-radius:10px; padding:28px; text-align:center; cursor:pointer; transition: border-color 0.2s;" id="importDropZone" onclick="document.getElementById('importFileInput').click()">
+        <div style="font-size:28px; margin-bottom:8px;">📁</div>
+        <div style="font-size:13px; color:var(--color-text-secondary);">Click or drag a JSON file here</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-sm" onclick="App.DataIO.hideImportModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       CONFIRM DELETE MODAL (shared)
+       ========================================== -->
+  <div class="confirm-overlay" id="confirmDeleteModal">
+    <div class="confirm-box">
+      <div class="confirm-icon">⚠️</div>
+      <h3 id="confirmDeleteTitle">Delete Item?</h3>
+      <p id="confirmDeleteMessage">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-sm" id="confirmDeleteCancelBtn">Cancel</button>
+        <button class="btn btn-sm btn-danger" id="confirmDeleteConfirmBtn">🗑️ Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       PROMPT VIEW MODAL
+       ========================================== -->
+  <div class="prompt-modal-overlay" id="promptViewModal">
+    <div class="prompt-modal-box">
+      <div class="prompt-modal-header">
+        <h3>📋 Prompt Details</h3>
+        <button class="prompt-modal-close" onclick="App.PromptLibrary.closeViewModal()">✕</button>
+      </div>
+      <div class="prompt-modal-image" id="promptViewImage" style="display:none;">
+        <img id="promptViewImgEl" src="" alt="Prompt Image" />
+      </div>
+      <div class="prompt-modal-text" id="promptViewText"></div>
+      <div class="prompt-modal-footer">
+        <button class="btn btn-sm btn-primary" onclick="App.PromptLibrary.copyFromModal()">📋 Copy Prompt</button>
+        <button class="btn btn-sm" onclick="App.PromptLibrary.closeViewModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       PROMPT EDITOR MODAL
+       ========================================== -->
+  <div class="prompt-editor-overlay" id="promptEditorModal">
+    <div class="prompt-editor-box">
+      <h3 id="promptEditorTitle">New Prompt</h3>
+      <label>Prompt Image</label>
+      <div class="prompt-editor-img-preview" id="promptEditorImgPreview" onclick="document.getElementById('promptImageInput').click()">
+        <div class="pe-placeholder" id="promptEditorImgPlaceholder">
+          <span>🖼️</span>
+          <span>Click to upload</span>
+        </div>
+      </div>
+      <label>Prompt Text</label>
+      <textarea id="promptEditorTextarea" placeholder="Enter your prompt text here..."></textarea>
+      <div class="prompt-editor-actions">
+        <button class="btn btn-sm" onclick="App.PromptLibrary.closeEditor()">Cancel</button>
+        <button class="btn btn-sm btn-primary" onclick="App.PromptLibrary.saveFromEditor()">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       TOOL EDITOR MODAL
+       ========================================== -->
+  <div class="tool-editor-overlay" id="toolEditorModal">
+    <div class="tool-editor-box">
+      <h3 id="toolEditorTitle">Add Tool</h3>
+      <label>Tool Name</label>
+      <input type="text" id="toolEditorName" placeholder="e.g. ChatGPT" />
+      <label>Tool URL</label>
+      <input type="url" id="toolEditorURL" placeholder="https://example.com" />
+      <label>Tool Icon</label>
+      <div class="tool-editor-icon-preview" id="toolEditorIconPreview" onclick="document.getElementById('toolIconInput').click()">
+        <div class="te-placeholder" id="toolEditorIconPlaceholder">
+          <span>🛠️</span>
+          <span>Upload icon</span>
+        </div>
+      </div>
+      <div class="tool-editor-actions">
+        <button class="btn btn-sm" onclick="App.ToolsDashboard.closeEditor()">Cancel</button>
+        <button class="btn btn-sm btn-primary" onclick="App.ToolsDashboard.saveFromEditor()">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       IMAGE LIGHTBOX
+       ========================================== -->
+  <div class="lightbox-overlay" id="lightboxOverlay" onclick="App.Lightbox.close()">
+    <img id="lightboxImage" src="" alt="Preview" />
+  </div>
+
+  <!-- ==========================================
+       TOAST CONTAINER
+       ========================================== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Hidden file inputs -->
+  <input type="file" accept="image/*" class="hidden-input" id="calImageInput" />
+  <input type="file" accept="image/*" multiple class="hidden-input" id="calGalleryInput" />
+  <input type="file" accept="image/*" class="hidden-input" id="kbImageInput" />
+  <input type="file" accept="image/*" multiple class="hidden-input" id="kbGalleryInput" />
+  <input type="file" accept="image/*" class="hidden-input" id="kbCoverInput" />
+  <input type="file" accept="image/*" class="hidden-input" id="promptImageInput" />
+  <input type="file" accept="image/*" class="hidden-input" id="toolIconInput" />
+
+  <!-- ==========================================
+       JAVASCRIPT APPLICATION LOGIC
+       ========================================== -->
+  <script>
+    /**
+     * ============================================================
+     * APP — Main Application Namespace
+     * ============================================================
+     */
+    const App = {};
+
+    /* ==========================================================
+       MODULE: IndexedDB Storage Engine
+       ========================================================== */
+    App.DB = (() => {
+      const DB_NAME = 'knowledgeDashboardDB';
+      const DB_VERSION = 1;
+      let db = null;
+
+      const STORES = {
+        calendar_entries: { keyPath: 'id' },
+        knowledge_blocks: { keyPath: 'id' },
+        prompt_library:   { keyPath: 'id' },
+        tool_bookmarks:   { keyPath: 'id' },
+        app_settings:     { keyPath: 'key' }
+      };
+
+      function init() {
+        return new Promise((resolve, reject) => {
+          if (db) { resolve(db); return; }
+          const request = indexedDB.open(DB_NAME, DB_VERSION);
+          request.onupgradeneeded = (e) => {
+            const database = e.target.result;
+            for (const [storeName, config] of Object.entries(STORES)) {
+              if (!database.objectStoreNames.contains(storeName)) {
+                database.createObjectStore(storeName, { keyPath: config.keyPath });
+              }
+            }
+          };
+          request.onsuccess = (e) => {
+            db = e.target.result;
+            console.log('[DB] Database opened successfully');
+            resolve(db);
+          };
+          request.onerror = (e) => {
+            console.error('[DB] Database error:', e.target.error);
+            reject(e.target.error);
+          };
+        });
+      }
+
+      function getStore(storeName, mode = 'readonly') {
+        const tx = db.transaction(storeName, mode);
+        return tx.objectStore(storeName);
+      }
+
+      function put(storeName, data) {
+        return new Promise((resolve, reject) => {
+          const store = getStore(storeName, 'readwrite');
+          const req = store.put(data);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      function get(storeName, key) {
+        return new Promise((resolve, reject) => {
+          const store = getStore(storeName, 'readonly');
+          const req = store.get(key);
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      function getAll(storeName) {
+        return new Promise((resolve, reject) => {
+          const store = getStore(storeName, 'readonly');
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      function remove(storeName, key) {
+        return new Promise((resolve, reject) => {
+          const store = getStore(storeName, 'readwrite');
+          const req = store.delete(key);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      function clear(storeName) {
+        return new Promise((resolve, reject) => {
+          const store = getStore(storeName, 'readwrite');
+          const req = store.clear();
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      async function exportAll() {
+        const data = {};
+        for (const storeName of Object.keys(STORES)) {
+          data[storeName] = await getAll(storeName);
+        }
+        return data;
+      }
+
+      async function importAll(data) {
+        for (const [storeName, records] of Object.entries(data)) {
+          if (STORES[storeName] && Array.isArray(records)) {
+            for (const record of records) {
+              await put(storeName, record);
+            }
+          }
+        }
+      }
+
+      function generateId() {
+        return Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 9);
+      }
+
+      return { init, put, get, getAll, remove, clear, exportAll, importAll, generateId };
+    })();
+
+
+    /* ==========================================================
+       MODULE: Toast Notifications
+       ========================================================== */
+    App.Toast = (() => {
+      const container = document.getElementById('toastContainer');
+
+      function show(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          if (toast.parentNode) toast.remove();
+        }, 3100);
+      }
+
+      return { show };
+    })();
+
+
+    /* ==========================================================
+       MODULE: Lightbox (shared image preview)
+       ========================================================== */
+    App.Lightbox = (() => {
+      function open(imgSrc) {
+        const overlay = document.getElementById('lightboxOverlay');
+        const img = document.getElementById('lightboxImage');
+        img.src = imgSrc;
+        overlay.classList.add('visible');
+      }
+
+      function close() {
+        document.getElementById('lightboxOverlay').classList.remove('visible');
+        document.getElementById('lightboxImage').src = '';
+      }
+
+      return { open, close };
+    })();
+
+
+    /* ==========================================================
+       MODULE: Shared Confirm Dialog
+       ========================================================== */
+    App.ConfirmDialog = (() => {
+      let onConfirmCallback = null;
+      let onCancelCallback = null;
+
+      const overlay = document.getElementById('confirmDeleteModal');
+      const titleEl = document.getElementById('confirmDeleteTitle');
+      const msgEl = document.getElementById('confirmDeleteMessage');
+      const cancelBtn = document.getElementById('confirmDeleteCancelBtn');
+      const confirmBtn = document.getElementById('confirmDeleteConfirmBtn');
+
+      cancelBtn.addEventListener('click', () => {
+        hide();
+        if (onCancelCallback) onCancelCallback();
+      });
+
+      confirmBtn.addEventListener('click', () => {
+        hide();
+        if (onConfirmCallback) onConfirmCallback();
+      });
+
+      function show({ title, message, onConfirm, onCancel }) {
+        titleEl.textContent = title || 'Delete Item?';
+        msgEl.textContent = message || 'This action cannot be undone.';
+        onConfirmCallback = onConfirm || null;
+        onCancelCallback = onCancel || null;
+        overlay.classList.add('visible');
+      }
+
+      function hide() {
+        overlay.classList.remove('visible');
+        onConfirmCallback = null;
+        onCancelCallback = null;
+      }
+
+      return { show, hide };
+    })();
+
+
+    /* ==========================================================
+       MODULE: BlockRenderer — Shared Content Block Rendering
+       ========================================================== */
+    App.BlockRenderer = (() => {
+
+      function createBlockElement(block, index, isEditing, callbacks) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'content-block';
+        wrapper.dataset.type = block.type;
+        wrapper.dataset.blockId = block.id;
+        wrapper.dataset.index = index;
+
+        const controls = document.createElement('div');
+        controls.className = 'block-controls';
+
+        const dragBtn = document.createElement('button');
+        dragBtn.className = 'block-ctrl-btn drag-handle';
+        dragBtn.title = 'Drag to reorder';
+        dragBtn.textContent = '⠿';
+        dragBtn.onmousedown = (e) => callbacks.onStartDrag(e, block.id);
+        controls.appendChild(dragBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'block-ctrl-btn';
+        deleteBtn.title = 'Delete block';
+        deleteBtn.textContent = '✕';
+        deleteBtn.onclick = () => callbacks.onDeleteBlock(block.id);
+        controls.appendChild(deleteBtn);
+
+        wrapper.appendChild(controls);
+
+        switch (block.type) {
+          case 'heading': renderHeading(wrapper, block, isEditing, callbacks); break;
+          case 'text': renderText(wrapper, block, isEditing, callbacks); break;
+          case 'image': renderImage(wrapper, block, isEditing, callbacks); break;
+          case 'gallery': renderGallery(wrapper, block, isEditing, callbacks); break;
+          case 'imagebox': renderImageBox(wrapper, block, isEditing, callbacks); break;
+          case 'divider': renderDivider(wrapper); break;
+        }
+
+        return wrapper;
+      }
+
+      function renderHeading(wrapper, block, isEditing, cb) {
+        wrapper.dataset.size = block.size || 'h2';
+        const heading = document.createElement('div');
+        heading.className = `block-heading size-${block.size || 'h2'}`;
+        heading.textContent = block.text || 'Untitled Heading';
+        if (isEditing) {
+          heading.contentEditable = 'true';
+          heading.addEventListener('input', cb.onAutoSave);
+          heading.addEventListener('blur', cb.onAutoSave);
+        }
+        wrapper.appendChild(heading);
+
+        if (isEditing) {
+          const sizeSelector = document.createElement('div');
+          sizeSelector.style.cssText = 'margin-top:8px; display:flex; gap:4px;';
+          ['h1', 'h2', 'h3'].forEach(size => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-sm';
+            btn.textContent = size.toUpperCase();
+            btn.style.cssText = (block.size || 'h2') === size ? 'background:var(--color-primary);color:white;border-color:var(--color-primary);' : '';
+            btn.onclick = () => {
+              wrapper.dataset.size = size;
+              heading.className = `block-heading size-${size}`;
+              sizeSelector.querySelectorAll('.btn').forEach(b => b.style.cssText = '');
+              btn.style.cssText = 'background:var(--color-primary);color:white;border-color:var(--color-primary);';
+              cb.onAutoSave();
+            };
+            sizeSelector.appendChild(btn);
+          });
+          wrapper.appendChild(sizeSelector);
+        }
+      }
+
+      function renderText(wrapper, block, isEditing, cb) {
+        const text = document.createElement('div');
+        text.className = 'block-text';
+        text.textContent = block.text_content || '';
+        if (isEditing) {
+          text.contentEditable = 'true';
+          text.setAttribute('data-placeholder', 'Type your text here...');
+          text.addEventListener('input', cb.onAutoSave);
+          text.addEventListener('blur', cb.onAutoSave);
+        }
+        if (!block.text_content && !isEditing) {
+          text.textContent = 'Empty text block';
+          text.style.color = 'var(--color-text-secondary)';
+          text.style.fontStyle = 'italic';
+        }
+        wrapper.appendChild(text);
+      }
+
+      function renderImage(wrapper, block, isEditing, cb) {
+        const container = document.createElement('div');
+        container.className = 'block-image';
+
+        if (block.image_data) {
+          const img = document.createElement('img');
+          img.src = block.image_data;
+          img.alt = block.caption || 'Image';
+          img.loading = 'lazy';
+          img.style.cursor = 'zoom-in';
+          img.onclick = () => App.Lightbox.open(block.image_data);
+          container.appendChild(img);
+
+          if (isEditing) {
+            const changeBtn = document.createElement('button');
+            changeBtn.className = 'btn btn-sm';
+            changeBtn.textContent = '🔄 Change Image';
+            changeBtn.style.cssText = 'margin-top:8px;';
+            changeBtn.onclick = () => cb.onImageUpload(block.id);
+            container.appendChild(changeBtn);
+          }
+        } else {
+          if (isEditing) {
+            const uploadZone = document.createElement('div');
+            uploadZone.className = 'image-upload-zone';
+            uploadZone.innerHTML = '<span class="upload-icon">🖼️</span><span>Click to upload image</span>';
+            uploadZone.onclick = () => cb.onImageUpload(block.id);
+            uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); uploadZone.style.borderColor = 'var(--color-primary)'; });
+            uploadZone.addEventListener('dragleave', () => { uploadZone.style.borderColor = ''; });
+            uploadZone.addEventListener('drop', (e) => {
+              e.preventDefault(); e.stopPropagation();
+              uploadZone.style.borderColor = '';
+              const file = e.dataTransfer.files[0];
+              if (file && file.type.startsWith('image/')) {
+                cb.onImageFileDrop(file, block.id);
+              }
+            });
+            container.appendChild(uploadZone);
+          } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'image-upload-zone';
+            placeholder.style.cursor = 'default';
+            placeholder.innerHTML = '<span class="upload-icon">🖼️</span><span>No image uploaded</span>';
+            container.appendChild(placeholder);
+          }
+        }
+
+        wrapper.appendChild(container);
+
+        const caption = document.createElement('div');
+        caption.className = 'block-image-caption';
+        caption.textContent = block.caption || '';
+        if (isEditing) {
+          caption.contentEditable = 'true';
+          if (!block.caption) caption.textContent = '';
+          caption.setAttribute('data-placeholder', 'Add a caption...');
+          caption.addEventListener('input', cb.onAutoSave);
+          caption.addEventListener('blur', cb.onAutoSave);
+        }
+        if (block.caption || isEditing) wrapper.appendChild(caption);
+      }
+
+      function renderGallery(wrapper, block, isEditing, cb) {
+        const grid = document.createElement('div');
+        grid.className = 'gallery-grid';
+        const images = block.images || [];
+
+        images.forEach((imgSrc, i) => {
+          const item = document.createElement('div');
+          item.className = 'gallery-item';
+
+          const img = document.createElement('img');
+          img.src = imgSrc;
+          img.alt = `Gallery image ${i + 1}`;
+          img.loading = 'lazy';
+          img.onclick = () => App.Lightbox.open(imgSrc);
+          item.appendChild(img);
+
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'gallery-remove-btn';
+          removeBtn.textContent = '✕';
+          removeBtn.onclick = (e) => {
+            e.stopPropagation();
+            cb.onGalleryRemove(block.id, i);
+          };
+          item.appendChild(removeBtn);
+
+          grid.appendChild(item);
+        });
+
+        const addBtn = document.createElement('div');
+        addBtn.className = 'gallery-add-btn';
+        addBtn.innerHTML = '<span style="font-size:20px">➕</span><span>Add Images</span>';
+        addBtn.onclick = () => cb.onGalleryUpload(block.id);
+        grid.appendChild(addBtn);
+
+        wrapper.appendChild(grid);
+
+        if (images.length === 0 && !isEditing) {
+          const emptyMsg = document.createElement('div');
+          emptyMsg.style.cssText = 'text-align:center; color:var(--color-text-secondary); font-size:13px; padding:20px;';
+          emptyMsg.textContent = 'Empty gallery';
+          wrapper.appendChild(emptyMsg);
+        }
+      }
+
+      function renderImageBox(wrapper, block, isEditing, cb) {
+        const box = document.createElement('div');
+        box.className = 'image-box';
+
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'image-box-img';
+
+        if (block.image) {
+          const img = document.createElement('img');
+          img.src = block.image;
+          img.alt = block.title || 'Image box';
+          img.loading = 'lazy';
+          img.style.cursor = 'zoom-in';
+          img.onclick = () => App.Lightbox.open(block.image);
+          imgContainer.appendChild(img);
+
+          if (isEditing) {
+            const changeBtn = document.createElement('button');
+            changeBtn.className = 'btn btn-sm';
+            changeBtn.textContent = '🔄 Change';
+            changeBtn.style.cssText = 'margin-top:6px; display:block;';
+            changeBtn.onclick = () => cb.onImageUpload(block.id);
+            imgContainer.appendChild(changeBtn);
+          }
+        } else {
+          if (isEditing) {
+            const uploadZone = document.createElement('div');
+            uploadZone.className = 'image-upload-zone';
+            uploadZone.style.minHeight = '120px';
+            uploadZone.innerHTML = '<span class="upload-icon">🖼️</span><span>Add Image</span>';
+            uploadZone.onclick = () => cb.onImageUpload(block.id);
+            imgContainer.appendChild(uploadZone);
+          } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'image-upload-zone';
+            placeholder.style.cssText = 'min-height:120px; cursor:default;';
+            placeholder.innerHTML = '<span class="upload-icon">🖼️</span>';
+            imgContainer.appendChild(placeholder);
+          }
+        }
+        box.appendChild(imgContainer);
+
+        const content = document.createElement('div');
+        content.className = 'image-box-content';
+
+        const title = document.createElement('div');
+        title.className = 'image-box-title';
+        title.textContent = block.title || (isEditing ? '' : 'Untitled');
+        if (isEditing) {
+          title.contentEditable = 'true';
+          title.setAttribute('data-placeholder', 'Title...');
+          title.addEventListener('input', cb.onAutoSave);
+        }
+        content.appendChild(title);
+
+        const desc = document.createElement('div');
+        desc.className = 'image-box-desc';
+        desc.textContent = block.description || (isEditing ? '' : 'No description');
+        if (isEditing) {
+          desc.contentEditable = 'true';
+          desc.setAttribute('data-placeholder', 'Description...');
+          desc.addEventListener('input', cb.onAutoSave);
+        }
+        content.appendChild(desc);
+
+        box.appendChild(content);
+        wrapper.appendChild(box);
+      }
+
+      function renderDivider(wrapper) {
+        const hr = document.createElement('hr');
+        hr.className = 'block-divider';
+        wrapper.appendChild(hr);
+      }
+
+      function collectBlocksFromDOM(blocksList) {
+        const blocks = blocksList.querySelectorAll('.content-block');
+        const elements = [];
+
+        blocks.forEach(blockEl => {
+          const type = blockEl.dataset.type;
+          const blockId = blockEl.dataset.blockId;
+          let blockData = { id: blockId, type: type };
+
+          switch (type) {
+            case 'heading': {
+              const heading = blockEl.querySelector('.block-heading');
+              blockData.text = heading ? heading.textContent : '';
+              blockData.size = blockEl.dataset.size || 'h2';
+              break;
+            }
+            case 'text': {
+              const text = blockEl.querySelector('.block-text');
+              blockData.text_content = text ? text.textContent : '';
+              break;
+            }
+            case 'image': {
+              const img = blockEl.querySelector('.block-image img');
+              const caption = blockEl.querySelector('.block-image-caption');
+              blockData.image_data = img ? img.src : null;
+              blockData.caption = caption ? caption.textContent : '';
+              break;
+            }
+            case 'gallery': {
+              const items = blockEl.querySelectorAll('.gallery-item img');
+              blockData.images = Array.from(items).map(img => img.src);
+              break;
+            }
+            case 'imagebox': {
+              const img = blockEl.querySelector('.image-box-img img');
+              const title = blockEl.querySelector('.image-box-title');
+              const desc = blockEl.querySelector('.image-box-desc');
+              blockData.image = img ? img.src : null;
+              blockData.title = title ? title.textContent : '';
+              blockData.description = desc ? desc.textContent : '';
+              break;
+            }
+            case 'divider': break;
+          }
+
+          elements.push(blockData);
+        });
+
+        return elements;
+      }
+
+      function createEmptyBlock(type) {
+        const blockId = App.DB.generateId();
+        let newBlock = { id: blockId, type: type };
+
+        switch (type) {
+          case 'heading': newBlock.text = ''; newBlock.size = 'h2'; break;
+          case 'text': newBlock.text_content = ''; break;
+          case 'image': newBlock.image_data = null; newBlock.caption = ''; break;
+          case 'gallery': newBlock.images = []; break;
+          case 'imagebox': newBlock.image = null; newBlock.title = ''; newBlock.description = ''; break;
+          case 'divider': break;
+        }
+
+        return newBlock;
+      }
+
+      function generatePreview(elements, maxLength = 120) {
+        if (!elements || elements.length === 0) return '';
+        for (const el of elements) {
+          if (el.type === 'text' && el.text_content) {
+            return el.text_content.substring(0, maxLength);
+          }
+          if (el.type === 'heading' && el.text) {
+            return el.text.substring(0, maxLength);
+          }
+        }
+        return `${elements.length} content block(s)`;
+      }
+
+      return { createBlockElement, collectBlocksFromDOM, createEmptyBlock, generatePreview };
+    })();
+
+
+    /* ==========================================================
+       MODULE: ContentEditorMixin — Shared editor logic
+       ========================================================== */
+    App.ContentEditorMixin = function(config) {
+      const blocksList = document.getElementById(config.blocksListId);
+      const emptyState = document.getElementById(config.emptyStateId);
+      let autoSaveTimer = null;
+      let dragSrcIndex = null;
+      let pendingImageBlockId = null;
+      let pendingGalleryBlockId = null;
+
+      const renderCallbacks = {
+        onAutoSave: () => triggerAutoSave(),
+        onStartDrag: (e, blockId) => startDrag(e, blockId),
+        onDeleteBlock: (blockId) => deleteBlock(blockId),
+        onImageUpload: (blockId) => {
+          pendingImageBlockId = blockId;
+          document.getElementById(config.imageInputId).click();
+        },
+        onGalleryUpload: (blockId) => {
+          pendingGalleryBlockId = blockId;
+          document.getElementById(config.galleryInputId).click();
+        },
+        onGalleryRemove: (blockId, imgIndex) => {
+          const elements = collectBlocks();
+          const block = elements.find(b => b.id === blockId);
+          if (block && block.images) {
+            block.images.splice(imgIndex, 1);
+          }
+          renderBlocks(elements);
+          triggerAutoSave();
+        },
+        onImageFileDrop: (file, blockId) => {
+          readImageFile(file, (base64) => {
+            applyImageToBlock(blockId, base64);
+          });
+        }
+      };
+
+      function triggerAutoSave() {
+        if (!App.EditMode.isActive()) return;
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+          const elements = collectBlocks();
+          config.onSave(elements);
+        }, 800);
+      }
+
+      function collectBlocks() {
+        return App.BlockRenderer.collectBlocksFromDOM(blocksList);
+      }
+
+      function renderBlocks(elements) {
+        blocksList.innerHTML = '';
+        if (!elements || elements.length === 0) {
+          emptyState.style.display = 'flex';
+          return;
+        }
+        emptyState.style.display = 'none';
+        const isEditing = App.EditMode.isActive();
+        elements.forEach((block, index) => {
+          const blockEl = App.BlockRenderer.createBlockElement(block, index, isEditing, renderCallbacks);
+          blockEl.addEventListener('dragover', handleDragOver);
+          blockEl.addEventListener('dragenter', handleDragEnter);
+          blockEl.addEventListener('dragleave', handleDragLeave);
+          blockEl.addEventListener('drop', handleDrop);
+          blocksList.appendChild(blockEl);
+        });
+      }
+
+      function addBlock(type) {
+        if (!App.EditMode.isActive()) {
+          App.Toast.show('Enable edit mode first', 'warning');
+          return;
+        }
+        const newBlock = App.BlockRenderer.createEmptyBlock(type);
+        const elements = collectBlocks();
+        elements.push(newBlock);
+        emptyState.style.display = 'none';
+        renderBlocks(elements);
+        triggerAutoSave();
+
+        setTimeout(() => {
+          const newEl = blocksList.querySelector(`[data-block-id="${newBlock.id}"]`);
+          if (newEl) {
+            newEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const editable = newEl.querySelector('[contenteditable="true"]');
+            if (editable) editable.focus();
+          }
+        }, 100);
+
+        App.Toast.show(`Added ${type} block`, 'success');
+      }
+
+      function deleteBlock(blockId) {
+        if (!App.EditMode.isActive()) return;
+        const elements = collectBlocks().filter(b => b.id !== blockId);
+        renderBlocks(elements);
+        triggerAutoSave();
+        App.Toast.show('Block deleted', 'info');
+      }
+
+      function startDrag(event, blockId) {
+        if (!App.EditMode.isActive()) return;
+        const blockEl = blocksList.querySelector(`[data-block-id="${blockId}"]`);
+        if (!blockEl) return;
+        dragSrcIndex = Array.from(blocksList.children).indexOf(blockEl);
+        blockEl.draggable = true;
+        blockEl.classList.add('dragging');
+        blockEl.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', blockId);
+        }, { once: true });
+        blockEl.addEventListener('dragend', () => {
+          blockEl.draggable = false;
+          blockEl.classList.remove('dragging');
+          blocksList.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+          dragSrcIndex = null;
+        }, { once: true });
+      }
+
+      function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+      function handleDragEnter(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        if (target.classList.contains('content-block') && !target.classList.contains('dragging')) {
+          target.classList.add('drag-over');
+        }
+      }
+      function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+      function handleDrop(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        target.classList.remove('drag-over');
+        if (dragSrcIndex === null) return;
+        const dropIndex = Array.from(blocksList.children).indexOf(target);
+        if (dropIndex === dragSrcIndex || dropIndex === -1) return;
+        const elements = collectBlocks();
+        const [moved] = elements.splice(dragSrcIndex, 1);
+        elements.splice(dropIndex, 0, moved);
+        renderBlocks(elements);
+        triggerAutoSave();
+        dragSrcIndex = null;
+      }
+
+      function readImageFile(file, callback) {
+        const reader = new FileReader();
+        reader.onload = (e) => callback(e.target.result);
+        reader.readAsDataURL(file);
+      }
+
+      function applyImageToBlock(blockId, base64) {
+        const elements = collectBlocks();
+        const block = elements.find(b => b.id === blockId);
+        if (!block) return;
+        if (block.type === 'image') block.image_data = base64;
+        else if (block.type === 'imagebox') block.image = base64;
+        renderBlocks(elements);
+        triggerAutoSave();
+      }
+
+      function applyGalleryImages(blockId, base64Array) {
+        const elements = collectBlocks();
+        const block = elements.find(b => b.id === blockId);
+        if (!block || block.type !== 'gallery') return;
+        if (!block.images) block.images = [];
+        block.images.push(...base64Array);
+        renderBlocks(elements);
+        triggerAutoSave();
+      }
+
+      function initImageInputs() {
+        document.getElementById(config.imageInputId).addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file && pendingImageBlockId) {
+            readImageFile(file, (base64) => {
+              applyImageToBlock(pendingImageBlockId, base64);
+              pendingImageBlockId = null;
+            });
+          }
+          e.target.value = '';
+        });
+
+        document.getElementById(config.galleryInputId).addEventListener('change', (e) => {
+          const files = Array.from(e.target.files);
+          if (files.length > 0 && pendingGalleryBlockId) {
+            const promises = files.map(file => new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onload = (ev) => resolve(ev.target.result);
+              reader.readAsDataURL(file);
+            }));
+            Promise.all(promises).then(base64Array => {
+              applyGalleryImages(pendingGalleryBlockId, base64Array);
+              pendingGalleryBlockId = null;
+            });
+          }
+          e.target.value = '';
+        });
+      }
+
+      function saveNow() {
+        clearTimeout(autoSaveTimer);
+        const elements = collectBlocks();
+        config.onSave(elements);
+      }
+
+      function updateEditableState() {
+        const elements = collectBlocks();
+        renderBlocks(elements);
+      }
+
+      return {
+        renderBlocks,
+        addBlock,
+        deleteBlock,
+        collectBlocks,
+        triggerAutoSave,
+        saveNow,
+        updateEditableState,
+        initImageInputs
+      };
+    };
+
+
+    /* ==========================================================
+       MODULE: Router (Dashboard Navigation)
+       ========================================================== */
+    App.Router = (() => {
+      let currentPage = 'home';
+      const pageTitles = {
+        home: 'Home Dashboard',
+        calendar: 'Calendar',
+        knowledge: 'Knowledge Blocks',
+        prompts: 'Prompt Library',
+        tools: 'Tools'
+      };
+
+      function navigate(page) {
+        if (App.EditMode.isActive()) {
+          if (!confirm('You have unsaved changes. Discard and navigate away?')) {
+            return;
+          }
+          App.EditMode.cancel(true);
+        }
+
+        currentPage = page;
+
+        document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
+        const targetPage = document.getElementById(`page-${page}`);
+        if (targetPage) targetPage.classList.add('active');
+
+        document.querySelectorAll('.nav-item').forEach(el => {
+          el.classList.toggle('active', el.dataset.page === page);
+        });
+
+        document.getElementById('topbarTitle').textContent = pageTitles[page] || page;
+
+        App.UI.closeSidebar();
+        document.getElementById('contentArea').scrollTop = 0;
+
+        // Page-specific init when navigating
+        if (page === 'calendar') {
+          App.CalendarEditor.backToCalendar();
+        }
+        if (page === 'knowledge') {
+          App.KBEditor.backToGrid();
+        }
+        if (page === 'prompts') {
+          App.PromptLibrary.loadAndRender();
+        }
+        if (page === 'tools') {
+          App.ToolsDashboard.loadAndRender();
+        }
+
+        console.log(`[Router] Navigated to: ${page}`);
+      }
+
+      function getCurrent() {
+        return currentPage;
+      }
+
+      return { navigate, getCurrent };
+    })();
+
+
+    /* ==========================================================
+       MODULE: Edit Mode Controller
+       ========================================================== */
+    App.EditMode = (() => {
+      let active = false;
+
+      function isActive() {
+        return active;
+      }
+
+      function toggle() {
+        if (active) { save(); } else { enable(); }
+      }
+
+      function enable() {
+        active = true;
+        document.getElementById('editModeBtn').classList.add('active');
+        document.getElementById('editModeBanner').classList.add('visible');
+        document.body.dataset.editMode = 'true';
+        // Update all editors' editable states
+        App.CalendarEditor.updateEditableState(true);
+        App.KBEditor.updateEditableState(true);
+        // Re-render prompt and tools views to show controls
+        App.PromptLibrary.render();
+        App.ToolsDashboard.render();
+        App.Toast.show('Edit mode enabled', 'warning');
+      }
+
+      function save() {
+        // Auto-save current editors before exiting
+        App.CalendarEditor.saveCurrentEntry();
+        App.KBEditor.saveCurrentBlock();
+        active = false;
+        document.getElementById('editModeBtn').classList.remove('active');
+        document.getElementById('editModeBanner').classList.remove('visible');
+        document.body.dataset.editMode = 'false';
+        App.CalendarEditor.updateEditableState(false);
+        App.KBEditor.updateEditableState(false);
+        App.PromptLibrary.render();
+        App.ToolsDashboard.render();
+        App.Toast.show('Changes saved!', 'success');
+      }
+
+      function cancel(silent = false) {
+        active = false;
+        document.getElementById('editModeBtn').classList.remove('active');
+        document.getElementById('editModeBanner').classList.remove('visible');
+        document.body.dataset.editMode = 'false';
+        App.CalendarEditor.updateEditableState(false);
+        App.KBEditor.updateEditableState(false);
+        // Reload to discard changes
+        App.CalendarEditor.reloadCurrentEntry();
+        App.KBEditor.reloadCurrentBlock();
+        App.PromptLibrary.loadAndRender();
+        App.ToolsDashboard.loadAndRender();
+        if (!silent) {
+          App.Toast.show('Changes discarded', 'info');
+        }
+      }
+
+      return { isActive, toggle, enable, save, cancel };
+    })();
+
+
+    /* ==========================================================
+       MODULE: UI Layout Engine
+       ========================================================== */
+    App.UI = (() => {
+      let sidebarOpen = false;
+
+      function toggleSidebar() {
+        sidebarOpen ? closeSidebar() : openSidebar();
+      }
+
+      function openSidebar() {
+        sidebarOpen = true;
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('visible');
+      }
+
+      function closeSidebar() {
+        sidebarOpen = false;
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('visible');
+      }
+
+      function init() {
+        document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+        renderHomeDashboard();
+      }
+
+      return { init, toggleSidebar, openSidebar, closeSidebar };
+    })();
+
+
+    /* ==========================================================
+       Home Dashboard Renderer
+       ========================================================== */
+    function renderHomeDashboard() {
+      const grid = document.getElementById('homeGrid');
+      const cards = [
+        { page: 'calendar', title: 'Calendar', desc: 'Store knowledge by date', icon: '📅', color: 'linear-gradient(135deg, #4f46e5, #6366f1)' },
+        { page: 'knowledge', title: 'Knowledge Blocks', desc: 'Organize information into topic blocks', icon: '📚', color: 'linear-gradient(135deg, #22c55e, #16a34a)' },
+        { page: 'prompts', title: 'Prompt Library', desc: 'Store prompts with images', icon: '💬', color: 'linear-gradient(135deg, #f59e0b, #d97706)' },
+        { page: 'tools', title: 'Tools', desc: 'Quick access to tools', icon: '🛠️', color: 'linear-gradient(135deg, #ef4444, #dc2626)' }
+      ];
+      grid.innerHTML = cards.map(card => `
+        <div class="dashboard-card" onclick="App.Router.navigate('${card.page}')">
+          <div class="card-icon" style="background:${card.color}">${card.icon}</div>
+          <div class="card-title">${card.title}</div>
+          <div class="card-desc">${card.desc}</div>
+          <span class="card-arrow">→</span>
+        </div>
+      `).join('');
+    }
+
+
+    /* ==========================================================
+       MODULE: Reusable Component System
+       ========================================================== */
+    App.Components = (() => {
+      function createCard({ title, content, className = '' }) {
+        const card = document.createElement('div');
+        card.className = `component-card ${className}`.trim();
+        if (title) {
+          const heading = document.createElement('h3');
+          heading.className = 'component-heading';
+          heading.style.fontSize = '16px';
+          heading.style.marginBottom = '12px';
+          heading.textContent = title;
+          card.appendChild(heading);
+        }
+        if (content) {
+          const body = document.createElement('div');
+          body.innerHTML = content;
+          card.appendChild(body);
+        }
+        return card;
+      }
+
+      function createHeading(text, subtitle) {
+        const wrapper = document.createElement('div');
+        const h = document.createElement('h1');
+        h.className = 'component-heading';
+        h.textContent = text;
+        wrapper.appendChild(h);
+        if (subtitle) {
+          const sub = document.createElement('p');
+          sub.className = 'component-heading-sub';
+          sub.textContent = subtitle;
+          wrapper.appendChild(sub);
+        }
+        return wrapper;
+      }
+
+      function createTextBlock(text, editable = false) {
+        const block = document.createElement('div');
+        block.className = 'component-text-block';
+        block.textContent = text;
+        if (editable) block.setAttribute('contenteditable', 'true');
+        return block;
+      }
+
+      function createImageBlock(src, alt = 'Image') {
+        const block = document.createElement('div');
+        block.className = 'component-image-block';
+        if (src) {
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = alt;
+          img.loading = 'lazy';
+          block.appendChild(img);
+        } else {
+          const placeholder = document.createElement('div');
+          placeholder.className = 'image-placeholder';
+          placeholder.innerHTML = '<span style="font-size:24px">🖼️</span><span>Click to add image</span>';
+          block.appendChild(placeholder);
+        }
+        return block;
+      }
+
+      return { createCard, createHeading, createTextBlock, createImageBlock };
+    })();
+
+
+    /* ==========================================================
+       MODULE: Data Import/Export
+       ========================================================== */
+    App.DataIO = (() => {
+      async function exportData() {
+        try {
+          const data = await App.DB.exportAll();
+          data._meta = { exportedAt: new Date().toISOString(), version: 1, app: 'KnowledgeDashboard' };
+          const json = JSON.stringify(data, null, 2);
+          const blob = new Blob([json], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `knowledge-dashboard-backup-${new Date().toISOString().split('T')[0]}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          App.Toast.show('Data exported successfully!', 'success');
+        } catch (err) {
+          console.error('[Export] Error:', err);
+          App.Toast.show('Export failed: ' + err.message, 'error');
+        }
+      }
+
+      function showImportModal() {
+        document.getElementById('importModal').classList.add('visible');
+      }
+
+      function hideImportModal() {
+        document.getElementById('importModal').classList.remove('visible');
+      }
+
+      async function handleImportFile(file) {
+        try {
+          const text = await file.text();
+          const data = JSON.parse(text);
+          if (!data._meta || data._meta.app !== 'KnowledgeDashboard') {
+            App.Toast.show('Invalid backup file format', 'error');
+            return;
+          }
+          delete data._meta;
+          await App.DB.importAll(data);
+          App.Toast.show('Data imported successfully!', 'success');
+          hideImportModal();
+          // Refresh current page data
+          const current = App.Router.getCurrent();
+          if (current === 'calendar') App.Calendar.render();
+          if (current === 'knowledge') App.KnowledgeBlocks.loadAndRenderGrid();
+          if (current === 'prompts') App.PromptLibrary.loadAndRender();
+          if (current === 'tools') App.ToolsDashboard.loadAndRender();
+        } catch (err) {
+          console.error('[Import] Error:', err);
+          App.Toast.show('Import failed: ' + err.message, 'error');
+        }
+      }
+
+      function init() {
+        const fileInput = document.getElementById('importFileInput');
+        const dropZone = document.getElementById('importDropZone');
+
+        fileInput.addEventListener('change', (e) => {
+          if (e.target.files[0]) {
+            handleImportFile(e.target.files[0]);
+            e.target.value = '';
+          }
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dropZone.style.borderColor = 'var(--color-primary)';
+          dropZone.style.background = 'var(--color-primary-pale)';
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+          dropZone.style.borderColor = '';
+          dropZone.style.background = '';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropZone.style.borderColor = '';
+          dropZone.style.background = '';
+          if (e.dataTransfer.files[0]) handleImportFile(e.dataTransfer.files[0]);
+        });
+
+        document.getElementById('importModal').addEventListener('click', (e) => {
+          if (e.target.id === 'importModal') hideImportModal();
+        });
+      }
+
+      return { exportData, showImportModal, hideImportModal, init };
+    })();
+
+
+    /* ==========================================================
+       MODULE: Calendar — Monthly Grid & Navigation
+       ========================================================== */
+    App.Calendar = (() => {
+      let currentYear = new Date().getFullYear();
+      let currentMonth = new Date().getMonth();
+      let entryDatesCache = new Set();
+
+      const MONTH_NAMES = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+      function formatDate(year, month, day) {
+        return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      }
+
+      function formatDateReadable(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return d.toLocaleDateString('en-US', options);
+      }
+
+      function getDayOfWeek(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        return WEEKDAY_NAMES[d.getDay()];
+      }
+
+      async function loadEntryDates() {
+        try {
+          const allEntries = await App.DB.getAll('calendar_entries');
+          entryDatesCache = new Set(allEntries.map(e => e.date));
+        } catch (err) {
+          console.error('[Calendar] Failed to load entry dates:', err);
+          entryDatesCache = new Set();
+        }
+      }
+
+      async function getDateSummary(dateStr) {
+        try {
+          const allEntries = await App.DB.getAll('calendar_entries');
+          const entry = allEntries.find(e => e.date === dateStr);
+          if (!entry || !entry.elements || entry.elements.length === 0) return null;
+          for (const block of entry.elements) {
+            if (block.type === 'heading' && block.text) return block.text.substring(0, 50);
+            if (block.type === 'text' && block.text_content) return block.text_content.substring(0, 50);
+          }
+          return `${entry.elements.length} block(s)`;
+        } catch {
+          return null;
+        }
+      }
+
+      function renderWeekdays() {
+        const container = document.getElementById('calWeekdays');
+        container.innerHTML = WEEKDAY_NAMES.map(d =>
+          `<div class="cal-weekday">${d}</div>`
+        ).join('');
+      }
+
+      async function render() {
+        await loadEntryDates();
+
+        document.getElementById('calMonthTitle').textContent =
+          `${MONTH_NAMES[currentMonth]} ${currentYear}`;
+
+        renderWeekdays();
+
+        const grid = document.getElementById('calGrid');
+        const today = new Date();
+        const todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
+
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const startDayOfWeek = firstDay.getDay();
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const prevMonth = new Date(currentYear, currentMonth, 0);
+        const daysInPrevMonth = prevMonth.getDate();
+
+        let cells = [];
+
+        for (let i = startDayOfWeek - 1; i >= 0; i--) {
+          const day = daysInPrevMonth - i;
+          const m = currentMonth - 1 < 0 ? 11 : currentMonth - 1;
+          const y = currentMonth - 1 < 0 ? currentYear - 1 : currentYear;
+          const dateStr = formatDate(y, m, day);
+          cells.push({ day, dateStr, otherMonth: true });
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dateStr = formatDate(currentYear, currentMonth, d);
+          cells.push({ day: d, dateStr, otherMonth: false });
+        }
+
+        const remaining = 7 - (cells.length % 7);
+        if (remaining < 7) {
+          for (let d = 1; d <= remaining; d++) {
+            const m = currentMonth + 1 > 11 ? 0 : currentMonth + 1;
+            const y = currentMonth + 1 > 11 ? currentYear + 1 : currentYear;
+            const dateStr = formatDate(y, m, d);
+            cells.push({ day: d, dateStr, otherMonth: true });
+          }
+        }
+
+        grid.innerHTML = cells.map(cell => {
+          const isToday = cell.dateStr === todayStr;
+          const hasEntry = entryDatesCache.has(cell.dateStr);
+          let classes = 'cal-day';
+          if (cell.otherMonth) classes += ' other-month';
+          if (isToday) classes += ' today';
+
+          let dotHtml = hasEntry ? '<div class="cal-day-dot"></div>' : '';
+
+          return `
+            <div class="${classes}" data-date="${cell.dateStr}" onclick="App.CalendarEditor.openDate('${cell.dateStr}')">
+              <span class="cal-day-number">${cell.day}</span>
+              ${dotHtml}
+              <div class="cal-day-tooltip" id="tooltip-${cell.dateStr}"></div>
+            </div>
+          `;
+        }).join('');
+
+        for (const dateStr of entryDatesCache) {
+          const tooltip = document.getElementById(`tooltip-${dateStr}`);
+          if (tooltip) {
+            getDateSummary(dateStr).then(summary => {
+              if (summary && tooltip) tooltip.textContent = summary;
+            });
+          }
+        }
+      }
+
+      function prevMonth() {
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+        render();
+      }
+
+      function nextMonth() {
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+        render();
+      }
+
+      function goToday() {
+        const today = new Date();
+        currentYear = today.getFullYear();
+        currentMonth = today.getMonth();
+        render();
+      }
+
+      function refreshDots() { render(); }
+
+      return { render, prevMonth, nextMonth, goToday, refreshDots, formatDate, formatDateReadable, getDayOfWeek };
+    })();
+
+
+    /* ==========================================================
+       MODULE: CalendarEditor — Entry Editor with Content Blocks
+       ========================================================== */
+    App.CalendarEditor = (() => {
+      let currentDate = null;
+      let currentEntry = null;
+      let editor = null;
+
+      const gridView = document.getElementById('calendarGridView');
+      const entryView = document.getElementById('calEntryView');
+      const entryTitle = document.getElementById('calEntryTitle');
+      const entryBadge = document.getElementById('calEntryBadge');
+
+      async function loadCalendarEntry(date) {
+        try {
+          const allEntries = await App.DB.getAll('calendar_entries');
+          return allEntries.find(e => e.date === date) || null;
+        } catch (err) {
+          console.error('[CalEditor] Load error:', err);
+          return null;
+        }
+      }
+
+      async function saveCalendarEntry(date, elements) {
+        try {
+          let entry = await loadCalendarEntry(date);
+          if (entry) {
+            entry.elements = elements;
+            entry.updatedAt = new Date().toISOString();
+          } else {
+            entry = {
+              id: App.DB.generateId(),
+              date: date,
+              elements: elements,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+          }
+          await App.DB.put('calendar_entries', entry);
+          currentEntry = entry;
+          console.log(`[CalEditor] Saved entry for ${date}`);
+        } catch (err) {
+          console.error('[CalEditor] Save error:', err);
+          App.Toast.show('Failed to save entry', 'error');
+        }
+      }
+
+      function initEditor() {
+        editor = App.ContentEditorMixin({
+          blocksListId: 'calBlocksList',
+          emptyStateId: 'calEntryEmpty',
+          imageInputId: 'calImageInput',
+          galleryInputId: 'calGalleryInput',
+          onSave: (elements) => {
+            if (currentDate) saveCalendarEntry(currentDate, elements);
+          },
+          onReload: () => reloadCurrentEntry(),
+          getElements: () => currentEntry ? currentEntry.elements : []
+        });
+        editor.initImageInputs();
+      }
+
+      async function openDate(dateStr) {
+        currentDate = dateStr;
+        gridView.style.display = 'none';
+        entryView.classList.add('active');
+        entryTitle.textContent = App.Calendar.formatDateReadable(dateStr);
+        entryBadge.textContent = App.Calendar.getDayOfWeek(dateStr);
+
+        currentEntry = await loadCalendarEntry(dateStr);
+        const elements = currentEntry ? currentEntry.elements : [];
+        editor.renderBlocks(elements);
+
+        document.getElementById('contentArea').scrollTop = 0;
+        console.log(`[CalEditor] Opened date: ${dateStr}, ${elements.length} blocks`);
+      }
+
+      function backToCalendar() {
+        if (App.EditMode.isActive() && currentDate) {
+          saveCurrentEntry();
+        }
+        currentDate = null;
+        currentEntry = null;
+        entryView.classList.remove('active');
+        gridView.style.display = 'block';
+        App.Calendar.render();
+      }
+
+      function addBlock(type) { editor.addBlock(type); }
+      function deleteBlock(blockId) { editor.deleteBlock(blockId); }
+
+      function saveCurrentEntry() {
+        if (!currentDate || !editor) return;
+        editor.saveNow();
+      }
+
+      async function reloadCurrentEntry() {
+        if (currentDate) await openDate(currentDate);
+      }
+
+      function updateEditableState() {
+        if (!currentDate || !editor) return;
+        editor.updateEditableState();
+      }
+
+      return {
+        openDate, backToCalendar, addBlock, deleteBlock,
+        saveCurrentEntry, reloadCurrentEntry, updateEditableState, initEditor
+      };
+    })();
+
+
+    /* ==========================================================
+       MODULE: KnowledgeBlocks — Grid View & CRUD
+       ========================================================== */
+    App.KnowledgeBlocks = (() => {
+      let blocks = [];
+      let dragSrcIndex = null;
+
+      const cardGrid = document.getElementById('kbCardGrid');
+      const emptyState = document.getElementById('kbEmptyState');
+      const blockCount = document.getElementById('kbBlockCount');
+
+      async function loadKnowledgeBlocks() {
+        try {
+          blocks = await App.DB.getAll('knowledge_blocks');
+          blocks.sort((a, b) => {
+            if (a.sortOrder !== undefined && b.sortOrder !== undefined) {
+              return a.sortOrder - b.sortOrder;
+            }
+            return (a.createdAt || '').localeCompare(b.createdAt || '');
+          });
+          return blocks;
+        } catch (err) {
+          console.error('[KB] Load error:', err);
+          blocks = [];
+          return [];
+        }
+      }
+
+      async function saveSortOrder() {
+        try {
+          for (let i = 0; i < blocks.length; i++) {
+            blocks[i].sortOrder = i;
+            await App.DB.put('knowledge_blocks', blocks[i]);
+          }
+        } catch (err) {
+          console.error('[KB] Sort save error:', err);
+        }
+      }
+
+      async function createBlock() {
+        if (!App.EditMode.isActive()) {
+          App.Toast.show('Enable edit mode first', 'warning');
+          return;
+        }
+
+        const newBlock = {
+          id: App.DB.generateId(),
+          title: 'Untitled Block',
+          coverImage: null,
+          contentElements: [],
+          sortOrder: blocks.length,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+
+        await App.DB.put('knowledge_blocks', newBlock);
+        blocks.push(newBlock);
+        renderGrid();
+        App.Toast.show('New block created!', 'success');
+
+        setTimeout(() => {
+          const newCard = cardGrid.querySelector(`[data-block-id="${newBlock.id}"]`);
+          if (newCard) newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+
+      function requestDelete(blockId, event) {
+        if (event) { event.stopPropagation(); event.preventDefault(); }
+        if (!App.EditMode.isActive()) return;
+
+        const block = blocks.find(b => b.id === blockId);
+        App.ConfirmDialog.show({
+          title: 'Delete Knowledge Block?',
+          message: block
+            ? `This will permanently remove "${block.title}" and all its content. This action cannot be undone.`
+            : 'This will permanently remove this block and all its content.',
+          onConfirm: async () => {
+            try {
+              await App.DB.remove('knowledge_blocks', blockId);
+              blocks = blocks.filter(b => b.id !== blockId);
+              renderGrid();
+              App.Toast.show('Block deleted', 'info');
+            } catch (err) {
+              console.error('[KB] Delete error:', err);
+              App.Toast.show('Failed to delete block', 'error');
+            }
+          }
+        });
+      }
+
+      function renderGrid() {
+        blockCount.textContent = `${blocks.length} block${blocks.length !== 1 ? 's' : ''}`;
+
+        if (blocks.length === 0) {
+          cardGrid.innerHTML = '';
+          emptyState.style.display = 'flex';
+          return;
+        }
+
+        emptyState.style.display = 'none';
+
+        cardGrid.innerHTML = blocks.map((block, index) => {
+          const preview = App.BlockRenderer.generatePreview(block.contentElements, 120);
+          const coverHtml = block.coverImage
+            ? `<img src="${block.coverImage}" alt="${escapeHtml(block.title)}" />`
+            : `<div class="kb-cover-placeholder">📚</div>`;
+
+          return `
+            <div class="kb-card" data-block-id="${block.id}" data-index="${index}">
+              <button class="kb-card-delete" onclick="App.KnowledgeBlocks.requestDelete('${block.id}', event)" title="Delete block">✕</button>
+              <button class="kb-card-drag" onmousedown="App.KnowledgeBlocks.startCardDrag(event, '${block.id}')" title="Drag to reorder">⠿</button>
+              <div class="kb-card-cover" onclick="App.KBEditor.openBlock('${block.id}')">
+                ${coverHtml}
+              </div>
+              <div class="kb-card-body" onclick="App.KBEditor.openBlock('${block.id}')">
+                <div class="kb-card-title">${escapeHtml(block.title)}</div>
+                <div class="kb-card-preview">${escapeHtml(preview) || 'No content yet'}</div>
+                <span class="kb-card-open">Open →</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        cardGrid.querySelectorAll('.kb-card').forEach(card => {
+          card.addEventListener('dragover', handleCardDragOver);
+          card.addEventListener('dragenter', handleCardDragEnter);
+          card.addEventListener('dragleave', handleCardDragLeave);
+          card.addEventListener('drop', handleCardDrop);
+        });
+      }
+
+      async function loadAndRenderGrid() {
+        await loadKnowledgeBlocks();
+        renderGrid();
+      }
+
+      function startCardDrag(event, blockId) {
+        if (!App.EditMode.isActive()) return;
+        event.stopPropagation();
+
+        const cardEl = cardGrid.querySelector(`[data-block-id="${blockId}"]`);
+        if (!cardEl) return;
+
+        dragSrcIndex = Array.from(cardGrid.querySelectorAll('.kb-card')).indexOf(cardEl);
+        cardEl.draggable = true;
+        cardEl.classList.add('dragging');
+
+        cardEl.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', blockId);
+        }, { once: true });
+
+        cardEl.addEventListener('dragend', () => {
+          cardEl.draggable = false;
+          cardEl.classList.remove('dragging');
+          cardGrid.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+          dragSrcIndex = null;
+        }, { once: true });
+      }
+
+      function handleCardDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+      function handleCardDragEnter(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        if (target.classList.contains('kb-card') && !target.classList.contains('dragging')) {
+          target.classList.add('drag-over');
+        }
+      }
+      function handleCardDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+      function handleCardDrop(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        target.classList.remove('drag-over');
+        if (dragSrcIndex === null) return;
+
+        const allCards = Array.from(cardGrid.querySelectorAll('.kb-card'));
+        const dropIndex = allCards.indexOf(target);
+        if (dropIndex === dragSrcIndex || dropIndex === -1) return;
+
+        const [moved] = blocks.splice(dragSrcIndex, 1);
+        blocks.splice(dropIndex, 0, moved);
+
+        renderGrid();
+        saveSortOrder();
+        dragSrcIndex = null;
+
+        App.Toast.show('Blocks reordered', 'success');
+      }
+
+      return {
+        loadKnowledgeBlocks, loadAndRenderGrid, createBlock,
+        requestDelete, renderGrid, startCardDrag,
+        getBlocks: () => blocks,
+        getBlockById: (id) => blocks.find(b => b.id === id)
+      };
+    })();
+
+
+    /* ==========================================================
+       MODULE: KBEditor — Knowledge Block Editor Page
+       ========================================================== */
+    App.KBEditor = (() => {
+      let currentBlockId = null;
+      let currentBlockData = null;
+      let editor = null;
+
+      const gridView = document.getElementById('kbGridView');
+      const editorView = document.getElementById('kbEditorView');
+      const editorTitle = document.getElementById('kbEditorTitle');
+      const coverDisplay = document.getElementById('kbCoverDisplay');
+
+      function initEditor() {
+        editor = App.ContentEditorMixin({
+          blocksListId: 'kbBlocksList',
+          emptyStateId: 'kbEntryEmpty',
+          imageInputId: 'kbImageInput',
+          galleryInputId: 'kbGalleryInput',
+          onSave: (elements) => {
+            if (currentBlockId) saveBlock(elements);
+          },
+          onReload: () => reloadCurrentBlock(),
+          getElements: () => currentBlockData ? currentBlockData.contentElements : []
+        });
+        editor.initImageInputs();
+
+        document.getElementById('kbCoverInput').addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file && currentBlockId) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              currentBlockData.coverImage = ev.target.result;
+              renderCover();
+              saveBlockMetadata();
+            };
+            reader.readAsDataURL(file);
+          }
+          e.target.value = '';
+        });
+
+        editorTitle.addEventListener('input', () => {
+          if (App.EditMode.isActive() && currentBlockData) {
+            currentBlockData.title = editorTitle.textContent || 'Untitled Block';
+            clearTimeout(titleSaveTimer);
+            titleSaveTimer = setTimeout(() => saveBlockMetadata(), 800);
+          }
+        });
+      }
+
+      let titleSaveTimer = null;
+
+      async function saveBlock(elements) {
+        if (!currentBlockId || !currentBlockData) return;
+        try {
+          currentBlockData.contentElements = elements;
+          currentBlockData.updatedAt = new Date().toISOString();
+          await App.DB.put('knowledge_blocks', currentBlockData);
+          console.log(`[KBEditor] Saved block ${currentBlockId}`);
+        } catch (err) {
+          console.error('[KBEditor] Save error:', err);
+          App.Toast.show('Failed to save block', 'error');
+        }
+      }
+
+      async function saveBlockMetadata() {
+        if (!currentBlockId || !currentBlockData) return;
+        try {
+          currentBlockData.updatedAt = new Date().toISOString();
+          await App.DB.put('knowledge_blocks', currentBlockData);
+        } catch (err) {
+          console.error('[KBEditor] Metadata save error:', err);
+        }
+      }
+
+      async function openBlock(blockId) {
+        currentBlockId = blockId;
+        try {
+          currentBlockData = await App.DB.get('knowledge_blocks', blockId);
+        } catch (err) {
+          console.error('[KBEditor] Failed to load block:', err);
+          App.Toast.show('Failed to load block', 'error');
+          return;
+        }
+
+        if (!currentBlockData) {
+          App.Toast.show('Block not found', 'error');
+          return;
+        }
+
+        gridView.style.display = 'none';
+        editorView.classList.add('active');
+
+        editorTitle.textContent = currentBlockData.title || 'Untitled Block';
+        editorTitle.contentEditable = App.EditMode.isActive() ? 'true' : 'false';
+
+        renderCover();
+
+        const elements = currentBlockData.contentElements || [];
+        editor.renderBlocks(elements);
+
+        document.getElementById('contentArea').scrollTop = 0;
+      }
+
+      function renderCover() {
+        if (currentBlockData && currentBlockData.coverImage) {
+          coverDisplay.innerHTML = `<img class="kb-cover-image" src="${currentBlockData.coverImage}" alt="Cover" />`;
+          const coverImg = coverDisplay.querySelector('.kb-cover-image');
+          if (coverImg) {
+            coverImg.onclick = () => App.Lightbox.open(currentBlockData.coverImage);
+            coverImg.style.cursor = 'zoom-in';
+          }
+        } else {
+          coverDisplay.innerHTML = '<div class="kb-cover-placeholder-big">📚</div>';
+        }
+      }
+
+      function changeCoverImage() {
+        document.getElementById('kbCoverInput').click();
+      }
+
+      function backToGrid() {
+        if (App.EditMode.isActive() && currentBlockId) {
+          saveCurrentBlock();
+        }
+        currentBlockId = null;
+        currentBlockData = null;
+        editorView.classList.remove('active');
+        gridView.style.display = 'block';
+        App.KnowledgeBlocks.loadAndRenderGrid();
+      }
+
+      function addBlock(type) { editor.addBlock(type); }
+
+      function saveCurrentBlock() {
+        if (!currentBlockId || !editor) return;
+        if (currentBlockData) {
+          currentBlockData.title = editorTitle.textContent || 'Untitled Block';
+        }
+        editor.saveNow();
+        saveBlockMetadata();
+      }
+
+      async function reloadCurrentBlock() {
+        if (currentBlockId) await openBlock(currentBlockId);
+      }
+
+      function updateEditableState() {
+        if (!currentBlockId) return;
+        const isEditing = App.EditMode.isActive();
+        editorTitle.contentEditable = isEditing ? 'true' : 'false';
+        if (editor) editor.updateEditableState();
+      }
+
+      return {
+        openBlock, backToGrid, addBlock, changeCoverImage,
+        saveCurrentBlock, reloadCurrentBlock, updateEditableState, initEditor
+      };
+    })();
+
+
+    /* ==========================================================
+       MODULE: PromptLibrary — Prompt Management Dashboard
+       ==========================================================
+       Manages prompts with images, supports horizontal and grid
+       layouts, copy to clipboard, expand modal, CRUD, drag reorder.
+    */
+    App.PromptLibrary = (() => {
+      let prompts = [];         // Array of prompt data objects
+      let currentLayout = 'horizontal';  // 'horizontal' or 'grid'
+      let gridCols = 4;        // 4 or 5
+      let dragSrcIndex = null;
+      let editorMode = 'create'; // 'create' or 'edit'
+      let editingPromptId = null;
+      let editorImageBase64 = null;
+      let viewingPrompt = null; // prompt currently shown in view modal
+
+      // DOM references
+      const countEl = document.getElementById('plCount');
+      const horizontalContainer = document.getElementById('plHorizontalContainer');
+      const gridContainer = document.getElementById('plGridContainer');
+      const horizontalList = document.getElementById('plHorizontalList');
+      const plGrid = document.getElementById('plGrid');
+      const emptyState = document.getElementById('plEmptyState');
+
+      /* ----------------------------------------------------------
+         DATA OPERATIONS
+         ---------------------------------------------------------- */
+
+      async function loadPrompts() {
+        try {
+          prompts = await App.DB.getAll('prompt_library');
+          // Sort by sortOrder, then by createdAt
+          prompts.sort((a, b) => {
+            if (a.sortOrder !== undefined && b.sortOrder !== undefined) {
+              return a.sortOrder - b.sortOrder;
+            }
+            return (a.createdAt || '').localeCompare(b.createdAt || '');
+          });
+        } catch (err) {
+          console.error('[PromptLib] Load error:', err);
+          prompts = [];
+        }
+      }
+
+      async function saveSortOrder() {
+        try {
+          for (let i = 0; i < prompts.length; i++) {
+            prompts[i].sortOrder = i;
+            await App.DB.put('prompt_library', prompts[i]);
+          }
+        } catch (err) {
+          console.error('[PromptLib] Sort save error:', err);
+        }
+      }
+
+      async function loadAndRender() {
+        await loadPrompts();
+        render();
+      }
+
+      /* ----------------------------------------------------------
+         LAYOUT SWITCHING
+         ---------------------------------------------------------- */
+
+      function setLayout(layout) {
+        currentLayout = layout;
+        document.querySelectorAll('.pl-layout-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.layout === layout);
+        });
+        if (layout === 'horizontal') {
+          horizontalContainer.classList.add('active');
+          gridContainer.classList.remove('active');
+        } else {
+          horizontalContainer.classList.remove('active');
+          gridContainer.classList.add('active');
+        }
+        render();
+      }
+
+      function setGridCols(cols) {
+        gridCols = cols;
+        document.querySelectorAll('.pl-grid-col-btn').forEach(btn => {
+          btn.classList.toggle('active', parseInt(btn.dataset.cols) === cols);
+        });
+        plGrid.classList.toggle('cols-5', cols === 5);
+        render();
+      }
+
+      /* ----------------------------------------------------------
+         RENDERING
+         ---------------------------------------------------------- */
+
+      function render() {
+        countEl.textContent = `${prompts.length} prompt${prompts.length !== 1 ? 's' : ''}`;
+
+        if (prompts.length === 0) {
+          horizontalList.innerHTML = '';
+          plGrid.innerHTML = '';
+          emptyState.style.display = 'flex';
+          return;
+        }
+
+        emptyState.style.display = 'none';
+
+        if (currentLayout === 'horizontal') {
+          renderHorizontal();
+        } else {
+          renderGrid();
+        }
+      }
+
+      function renderHorizontal() {
+        horizontalList.innerHTML = prompts.map((prompt, index) => {
+          const imgHtml = prompt.image
+            ? `<img src="${prompt.image}" alt="Prompt image" />`
+            : `<div class="pl-img-placeholder">💬</div>`;
+
+          const textPreview = escapeHtml(prompt.promptText || 'Empty prompt');
+
+          return `
+            <div class="pl-h-card" data-prompt-id="${prompt.id}" data-index="${index}">
+              <div class="pl-card-edit-controls">
+                <button class="pl-card-ctrl-btn drag-handle" onmousedown="App.PromptLibrary.startDrag(event, '${prompt.id}')" title="Drag to reorder">⠿</button>
+                <button class="pl-card-ctrl-btn edit-btn" onclick="App.PromptLibrary.openEditor('${prompt.id}')" title="Edit prompt">✏️</button>
+                <button class="pl-card-ctrl-btn" onclick="App.PromptLibrary.deletePrompt('${prompt.id}')" title="Delete prompt">✕</button>
+              </div>
+              <div class="pl-h-card-image" onclick="App.PromptLibrary.expandPrompt('${prompt.id}')">
+                ${imgHtml}
+              </div>
+              <div class="pl-h-card-body">
+                <div class="pl-h-card-text">${textPreview}</div>
+                <div class="pl-h-card-actions">
+                  <button class="btn btn-sm btn-primary" onclick="App.PromptLibrary.copyPrompt('${prompt.id}')">📋 Copy</button>
+                  <button class="btn btn-sm" onclick="App.PromptLibrary.expandPrompt('${prompt.id}')">🔍 Expand</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Setup drag & drop
+        horizontalList.querySelectorAll('.pl-h-card').forEach(card => {
+          card.addEventListener('dragover', handleDragOver);
+          card.addEventListener('dragenter', handleDragEnter);
+          card.addEventListener('dragleave', handleDragLeave);
+          card.addEventListener('drop', handleDrop);
+        });
+      }
+
+      function renderGrid() {
+        plGrid.innerHTML = prompts.map((prompt, index) => {
+          const imgHtml = prompt.image
+            ? `<img src="${prompt.image}" alt="Prompt image" />`
+            : `<div class="pl-img-placeholder">💬</div>`;
+
+          const previewText = (prompt.promptText || '').substring(0, 80);
+
+          return `
+            <div class="pl-g-card" data-prompt-id="${prompt.id}" data-index="${index}" onclick="App.PromptLibrary.expandPrompt('${prompt.id}')">
+              <div class="pl-card-edit-controls">
+                <button class="pl-card-ctrl-btn edit-btn" onclick="event.stopPropagation(); App.PromptLibrary.openEditor('${prompt.id}')" title="Edit">✏️</button>
+                <button class="pl-card-ctrl-btn" onclick="event.stopPropagation(); App.PromptLibrary.deletePrompt('${prompt.id}')" title="Delete">✕</button>
+              </div>
+              <div class="pl-g-card-image">
+                ${imgHtml}
+              </div>
+              <div class="pl-g-card-body">
+                <div class="pl-g-card-preview">${escapeHtml(previewText)}</div>
+                <div class="pl-g-card-actions">
+                  <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); App.PromptLibrary.copyPrompt('${prompt.id}')" title="Copy prompt">📋</button>
+                  <button class="btn btn-sm" onclick="event.stopPropagation(); App.PromptLibrary.expandPrompt('${prompt.id}')" title="Expand">🔍</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      /* ----------------------------------------------------------
+         COPY TO CLIPBOARD
+         ---------------------------------------------------------- */
+
+      function copyPrompt(promptId) {
+        const prompt = prompts.find(p => p.id === promptId);
+        if (!prompt || !prompt.promptText) {
+          App.Toast.show('No prompt text to copy', 'warning');
+          return;
+        }
+        navigator.clipboard.writeText(prompt.promptText).then(() => {
+          App.Toast.show('Prompt copied to clipboard!', 'success');
+        }).catch(() => {
+          // Fallback for older browsers
+          const textarea = document.createElement('textarea');
+          textarea.value = prompt.promptText;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          App.Toast.show('Prompt copied to clipboard!', 'success');
+        });
+      }
+
+      function copyFromModal() {
+        if (viewingPrompt) {
+          copyPrompt(viewingPrompt.id);
+        }
+      }
+
+      /* ----------------------------------------------------------
+         EXPAND / VIEW MODAL
+         ---------------------------------------------------------- */
+
+      function expandPrompt(promptId) {
+        const prompt = prompts.find(p => p.id === promptId);
+        if (!prompt) return;
+
+        viewingPrompt = prompt;
+        const overlay = document.getElementById('promptViewModal');
+        const imgSection = document.getElementById('promptViewImage');
+        const imgEl = document.getElementById('promptViewImgEl');
+        const textEl = document.getElementById('promptViewText');
+
+        if (prompt.image) {
+          imgEl.src = prompt.image;
+          imgSection.style.display = 'block';
+        } else {
+          imgSection.style.display = 'none';
+        }
+
+        textEl.textContent = prompt.promptText || 'No prompt text';
+        overlay.classList.add('visible');
+      }
+
+      function closeViewModal() {
+        document.getElementById('promptViewModal').classList.remove('visible');
+        viewingPrompt = null;
+      }
+
+      /* ----------------------------------------------------------
+         EDITOR MODAL (Create / Edit)
+         ---------------------------------------------------------- */
+
+      function openEditor(promptId) {
+        const overlay = document.getElementById('promptEditorModal');
+        const titleEl = document.getElementById('promptEditorTitle');
+        const textarea = document.getElementById('promptEditorTextarea');
+        const imgPreview = document.getElementById('promptEditorImgPreview');
+        const placeholder = document.getElementById('promptEditorImgPlaceholder');
+
+        if (promptId) {
+          // Edit mode
+          editorMode = 'edit';
+          editingPromptId = promptId;
+          const prompt = prompts.find(p => p.id === promptId);
+          if (!prompt) return;
+          titleEl.textContent = 'Edit Prompt';
+          textarea.value = prompt.promptText || '';
+          editorImageBase64 = prompt.image || null;
+
+          if (prompt.image) {
+            imgPreview.innerHTML = `<img src="${prompt.image}" alt="Preview" />`;
+          } else {
+            imgPreview.innerHTML = '<div class="pe-placeholder"><span>🖼️</span><span>Click to upload</span></div>';
+          }
+        } else {
+          // Create mode
+          editorMode = 'create';
+          editingPromptId = null;
+          editorImageBase64 = null;
+          titleEl.textContent = 'New Prompt';
+          textarea.value = '';
+          imgPreview.innerHTML = '<div class="pe-placeholder"><span>🖼️</span><span>Click to upload</span></div>';
+        }
+
+        overlay.classList.add('visible');
+      }
+
+      function closeEditor() {
+        document.getElementById('promptEditorModal').classList.remove('visible');
+        editorMode = 'create';
+        editingPromptId = null;
+        editorImageBase64 = null;
+      }
+
+      async function saveFromEditor() {
+        const textarea = document.getElementById('promptEditorTextarea');
+        const promptText = textarea.value.trim();
+
+        if (!promptText) {
+          App.Toast.show('Please enter prompt text', 'warning');
+          return;
+        }
+
+        if (editorMode === 'edit' && editingPromptId) {
+          // Update existing
+          const prompt = prompts.find(p => p.id === editingPromptId);
+          if (prompt) {
+            prompt.promptText = promptText;
+            prompt.image = editorImageBase64;
+            prompt.updatedAt = new Date().toISOString();
+            await App.DB.put('prompt_library', prompt);
+            App.Toast.show('Prompt updated!', 'success');
+          }
+        } else {
+          // Create new
+          const newPrompt = {
+            id: App.DB.generateId(),
+            image: editorImageBase64,
+            promptText: promptText,
+            sortOrder: prompts.length,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          await App.DB.put('prompt_library', newPrompt);
+          prompts.push(newPrompt);
+          App.Toast.show('Prompt created!', 'success');
+        }
+
+        closeEditor();
+        render();
+      }
+
+      /* ----------------------------------------------------------
+         DELETE
+         ---------------------------------------------------------- */
+
+      function deletePrompt(promptId) {
+        if (!App.EditMode.isActive()) return;
+
+        const prompt = prompts.find(p => p.id === promptId);
+        App.ConfirmDialog.show({
+          title: 'Delete Prompt?',
+          message: prompt
+            ? `This will permanently remove this prompt. This action cannot be undone.`
+            : 'This action cannot be undone.',
+          onConfirm: async () => {
+            try {
+              await App.DB.remove('prompt_library', promptId);
+              prompts = prompts.filter(p => p.id !== promptId);
+              render();
+              App.Toast.show('Prompt deleted', 'info');
+            } catch (err) {
+              console.error('[PromptLib] Delete error:', err);
+              App.Toast.show('Failed to delete prompt', 'error');
+            }
+          }
+        });
+      }
+
+      /* ----------------------------------------------------------
+         DRAG & DROP REORDER (horizontal layout)
+         ---------------------------------------------------------- */
+
+      function startDrag(event, promptId) {
+        if (!App.EditMode.isActive()) return;
+        event.stopPropagation();
+
+        const container = currentLayout === 'horizontal' ? horizontalList : plGrid;
+        const cardSelector = currentLayout === 'horizontal' ? '.pl-h-card' : '.pl-g-card';
+        const cardEl = container.querySelector(`[data-prompt-id="${promptId}"]`);
+        if (!cardEl) return;
+
+        dragSrcIndex = Array.from(container.querySelectorAll(cardSelector)).indexOf(cardEl);
+        cardEl.draggable = true;
+        cardEl.classList.add('dragging');
+
+        cardEl.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', promptId);
+        }, { once: true });
+
+        cardEl.addEventListener('dragend', () => {
+          cardEl.draggable = false;
+          cardEl.classList.remove('dragging');
+          container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+          dragSrcIndex = null;
+        }, { once: true });
+      }
+
+      function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+      function handleDragEnter(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        if (!target.classList.contains('dragging')) {
+          target.classList.add('drag-over');
+        }
+      }
+      function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+      function handleDrop(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        target.classList.remove('drag-over');
+        if (dragSrcIndex === null) return;
+
+        const container = currentLayout === 'horizontal' ? horizontalList : plGrid;
+        const cardSelector = currentLayout === 'horizontal' ? '.pl-h-card' : '.pl-g-card';
+        const allCards = Array.from(container.querySelectorAll(cardSelector));
+        const dropIndex = allCards.indexOf(target);
+
+        if (dropIndex === dragSrcIndex || dropIndex === -1) return;
+
+        const [moved] = prompts.splice(dragSrcIndex, 1);
+        prompts.splice(dropIndex, 0, moved);
+
+        render();
+        saveSortOrder();
+        dragSrcIndex = null;
+
+        App.Toast.show('Prompts reordered', 'success');
+      }
+
+      /* ----------------------------------------------------------
+         IMAGE INPUT HANDLER
+         ---------------------------------------------------------- */
+
+      function initImageInput() {
+        document.getElementById('promptImageInput').addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              editorImageBase64 = ev.target.result;
+              const preview = document.getElementById('promptEditorImgPreview');
+              preview.innerHTML = `<img src="${editorImageBase64}" alt="Preview" />`;
+            };
+            reader.readAsDataURL(file);
+          }
+          e.target.value = '';
+        });
+      }
+
+      /* ----------------------------------------------------------
+         CLOSE MODALS ON OVERLAY CLICK
+         ---------------------------------------------------------- */
+
+      function initModalClicks() {
+        document.getElementById('promptViewModal').addEventListener('click', (e) => {
+          if (e.target.id === 'promptViewModal') closeViewModal();
+        });
+        document.getElementById('promptEditorModal').addEventListener('click', (e) => {
+          if (e.target.id === 'promptEditorModal') closeEditor();
+        });
+      }
+
+      return {
+        loadAndRender, render, setLayout, setGridCols,
+        copyPrompt, copyFromModal, expandPrompt, closeViewModal,
+        openEditor, closeEditor, saveFromEditor,
+        deletePrompt, startDrag,
+        initImageInput, initModalClicks
+      };
+    })();
+
+
+    /* ==========================================================
+       MODULE: ToolsDashboard — Tool Bookmark Dashboard
+       ==========================================================
+       Manages tool bookmarks with icons, names, and URLs.
+       Grid layout with click-to-open, CRUD, drag reorder.
+    */
+    App.ToolsDashboard = (() => {
+      let tools = [];
+      let dragSrcIndex = null;
+      let editorMode = 'create'; // 'create' or 'edit'
+      let editingToolId = null;
+      let editorIconBase64 = null;
+
+      // DOM references
+      const countEl = document.getElementById('toolsCount');
+      const toolsGrid = document.getElementById('toolsGrid');
+      const emptyState = document.getElementById('toolsEmptyState');
+
+      /* ----------------------------------------------------------
+         DATA OPERATIONS
+         ---------------------------------------------------------- */
+
+      async function loadTools() {
+        try {
+          tools = await App.DB.getAll('tool_bookmarks');
+          tools.sort((a, b) => {
+            if (a.sortOrder !== undefined && b.sortOrder !== undefined) {
+              return a.sortOrder - b.sortOrder;
+            }
+            return (a.createdAt || '').localeCompare(b.createdAt || '');
+          });
+        } catch (err) {
+          console.error('[Tools] Load error:', err);
+          tools = [];
+        }
+      }
+
+      async function saveSortOrder() {
+        try {
+          for (let i = 0; i < tools.length; i++) {
+            tools[i].sortOrder = i;
+            await App.DB.put('tool_bookmarks', tools[i]);
+          }
+        } catch (err) {
+          console.error('[Tools] Sort save error:', err);
+        }
+      }
+
+      async function loadAndRender() {
+        await loadTools();
+        render();
+      }
+
+      /* ----------------------------------------------------------
+         RENDERING
+         ---------------------------------------------------------- */
+
+      function render() {
+        countEl.textContent = `${tools.length} tool${tools.length !== 1 ? 's' : ''}`;
+
+        if (tools.length === 0) {
+          toolsGrid.innerHTML = '';
+          emptyState.style.display = 'flex';
+          return;
+        }
+
+        emptyState.style.display = 'none';
+
+        toolsGrid.innerHTML = tools.map((tool, index) => {
+          const iconHtml = tool.iconImage
+            ? `<img src="${tool.iconImage}" alt="${escapeHtml(tool.toolName)}" />`
+            : `<div class="tool-icon-placeholder">🛠️</div>`;
+
+          return `
+            <div class="tool-card" data-tool-id="${tool.id}" data-index="${index}" onclick="App.ToolsDashboard.openToolURL('${tool.id}')">
+              <div class="tool-card-edit-controls">
+                <button class="tool-ctrl-btn drag-handle" onmousedown="App.ToolsDashboard.startDrag(event, '${tool.id}')" title="Drag to reorder">⠿</button>
+                <button class="tool-ctrl-btn edit-btn" onclick="event.stopPropagation(); App.ToolsDashboard.openEditor('${tool.id}')" title="Edit tool">✏️</button>
+                <button class="tool-ctrl-btn" onclick="event.stopPropagation(); App.ToolsDashboard.deleteTool('${tool.id}')" title="Delete tool">✕</button>
+              </div>
+              <div class="tool-card-icon">
+                ${iconHtml}
+              </div>
+              <div class="tool-card-name">${escapeHtml(tool.toolName)}</div>
+            </div>
+          `;
+        }).join('');
+
+        // Setup drag & drop
+        toolsGrid.querySelectorAll('.tool-card').forEach(card => {
+          card.addEventListener('dragover', handleDragOver);
+          card.addEventListener('dragenter', handleDragEnter);
+          card.addEventListener('dragleave', handleDragLeave);
+          card.addEventListener('drop', handleDrop);
+        });
+      }
+
+      /* ----------------------------------------------------------
+         OPEN TOOL URL
+         ---------------------------------------------------------- */
+
+      function openToolURL(toolId) {
+        // Don't open URL if in edit mode (user might be trying to edit)
+        if (App.EditMode.isActive()) return;
+
+        const tool = tools.find(t => t.id === toolId);
+        if (tool && tool.toolURL) {
+          window.open(tool.toolURL, '_blank', 'noopener,noreferrer');
+        } else {
+          App.Toast.show('No URL set for this tool', 'warning');
+        }
+      }
+
+      /* ----------------------------------------------------------
+         EDITOR MODAL (Create / Edit)
+         ---------------------------------------------------------- */
+
+      function openEditor(toolId) {
+        const overlay = document.getElementById('toolEditorModal');
+        const titleEl = document.getElementById('toolEditorTitle');
+        const nameInput = document.getElementById('toolEditorName');
+        const urlInput = document.getElementById('toolEditorURL');
+        const iconPreview = document.getElementById('toolEditorIconPreview');
+
+        if (toolId) {
+          editorMode = 'edit';
+          editingToolId = toolId;
+          const tool = tools.find(t => t.id === toolId);
+          if (!tool) return;
+          titleEl.textContent = 'Edit Tool';
+          nameInput.value = tool.toolName || '';
+          urlInput.value = tool.toolURL || '';
+          editorIconBase64 = tool.iconImage || null;
+
+          if (tool.iconImage) {
+            iconPreview.innerHTML = `<img src="${tool.iconImage}" alt="Icon" />`;
+          } else {
+            iconPreview.innerHTML = '<div class="te-placeholder"><span>🛠️</span><span>Upload icon</span></div>';
+          }
+        } else {
+          editorMode = 'create';
+          editingToolId = null;
+          editorIconBase64 = null;
+          titleEl.textContent = 'Add Tool';
+          nameInput.value = '';
+          urlInput.value = '';
+          iconPreview.innerHTML = '<div class="te-placeholder"><span>🛠️</span><span>Upload icon</span></div>';
+        }
+
+        overlay.classList.add('visible');
+      }
+
+      function closeEditor() {
+        document.getElementById('toolEditorModal').classList.remove('visible');
+        editorMode = 'create';
+        editingToolId = null;
+        editorIconBase64 = null;
+      }
+
+      async function saveFromEditor() {
+        const nameInput = document.getElementById('toolEditorName');
+        const urlInput = document.getElementById('toolEditorURL');
+        const toolName = nameInput.value.trim();
+        const toolURL = urlInput.value.trim();
+
+        if (!toolName) {
+          App.Toast.show('Please enter a tool name', 'warning');
+          return;
+        }
+
+        if (editorMode === 'edit' && editingToolId) {
+          const tool = tools.find(t => t.id === editingToolId);
+          if (tool) {
+            tool.toolName = toolName;
+            tool.toolURL = toolURL;
+            tool.iconImage = editorIconBase64;
+            tool.updatedAt = new Date().toISOString();
+            await App.DB.put('tool_bookmarks', tool);
+            App.Toast.show('Tool updated!', 'success');
+          }
+        } else {
+          const newTool = {
+            id: App.DB.generateId(),
+            toolName: toolName,
+            toolURL: toolURL,
+            iconImage: editorIconBase64,
+            sortOrder: tools.length,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          await App.DB.put('tool_bookmarks', newTool);
+          tools.push(newTool);
+          App.Toast.show('Tool added!', 'success');
+        }
+
+        closeEditor();
+        render();
+      }
+
+      /* ----------------------------------------------------------
+         DELETE
+         ---------------------------------------------------------- */
+
+      function deleteTool(toolId) {
+        if (!App.EditMode.isActive()) return;
+
+        const tool = tools.find(t => t.id === toolId);
+        App.ConfirmDialog.show({
+          title: 'Delete Tool?',
+          message: tool
+            ? `This will permanently remove "${tool.toolName}". This action cannot be undone.`
+            : 'This action cannot be undone.',
+          onConfirm: async () => {
+            try {
+              await App.DB.remove('tool_bookmarks', toolId);
+              tools = tools.filter(t => t.id !== toolId);
+              render();
+              App.Toast.show('Tool deleted', 'info');
+            } catch (err) {
+              console.error('[Tools] Delete error:', err);
+              App.Toast.show('Failed to delete tool', 'error');
+            }
+          }
+        });
+      }
+
+      /* ----------------------------------------------------------
+         DRAG & DROP REORDER
+         ---------------------------------------------------------- */
+
+      function startDrag(event, toolId) {
+        if (!App.EditMode.isActive()) return;
+        event.stopPropagation();
+
+        const cardEl = toolsGrid.querySelector(`[data-tool-id="${toolId}"]`);
+        if (!cardEl) return;
+
+        dragSrcIndex = Array.from(toolsGrid.querySelectorAll('.tool-card')).indexOf(cardEl);
+        cardEl.draggable = true;
+        cardEl.classList.add('dragging');
+
+        cardEl.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', toolId);
+        }, { once: true });
+
+        cardEl.addEventListener('dragend', () => {
+          cardEl.draggable = false;
+          cardEl.classList.remove('dragging');
+          toolsGrid.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+          dragSrcIndex = null;
+        }, { once: true });
+      }
+
+      function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+      function handleDragEnter(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        if (target.classList.contains('tool-card') && !target.classList.contains('dragging')) {
+          target.classList.add('drag-over');
+        }
+      }
+      function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+      function handleDrop(e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        target.classList.remove('drag-over');
+        if (dragSrcIndex === null) return;
+
+        const allCards = Array.from(toolsGrid.querySelectorAll('.tool-card'));
+        const dropIndex = allCards.indexOf(target);
+        if (dropIndex === dragSrcIndex || dropIndex === -1) return;
+
+        const [moved] = tools.splice(dragSrcIndex, 1);
+        tools.splice(dropIndex, 0, moved);
+
+        render();
+        saveSortOrder();
+        dragSrcIndex = null;
+
+        App.Toast.show('Tools reordered', 'success');
+      }
+
+      /* ----------------------------------------------------------
+         ICON INPUT HANDLER
+         ---------------------------------------------------------- */
+
+      function initIconInput() {
+        document.getElementById('toolIconInput').addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              editorIconBase64 = ev.target.result;
+              const preview = document.getElementById('toolEditorIconPreview');
+              preview.innerHTML = `<img src="${editorIconBase64}" alt="Icon" />`;
+            };
+            reader.readAsDataURL(file);
+          }
+          e.target.value = '';
+        });
+      }
+
+      /* ----------------------------------------------------------
+         CLOSE MODAL ON OVERLAY CLICK
+         ---------------------------------------------------------- */
+
+      function initModalClicks() {
+        document.getElementById('toolEditorModal').addEventListener('click', (e) => {
+          if (e.target.id === 'toolEditorModal') closeEditor();
+        });
+      }
+
+      return {
+        loadAndRender, render,
+        openToolURL, openEditor, closeEditor, saveFromEditor,
+        deleteTool, startDrag,
+        initIconInput, initModalClicks
+      };
+    })();
+
+
+    /* ==========================================================
+       UTILITY: Escape HTML
+       ========================================================== */
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+
+    /* ==========================================================
+       APPLICATION INITIALIZATION
+       ========================================================== */
+    (async function initApp() {
+      try {
+        // 1. Initialize IndexedDB
+        await App.DB.init();
+        console.log('[App] Database initialized');
+
+        // 2. Initialize UI
+        App.UI.init();
+        console.log('[App] UI initialized');
+
+        // 3. Initialize Data IO
+        App.DataIO.init();
+        console.log('[App] DataIO initialized');
+
+        // 4. Initialize Calendar
+        await App.Calendar.render();
+        console.log('[App] Calendar initialized');
+
+        // 5. Initialize Calendar Editor (with mixin)
+        App.CalendarEditor.initEditor();
+        console.log('[App] CalendarEditor initialized');
+
+        // 6. Initialize Knowledge Blocks Grid
+        await App.KnowledgeBlocks.loadAndRenderGrid();
+        console.log('[App] KnowledgeBlocks grid initialized');
+
+        // 7. Initialize Knowledge Block Editor (with mixin)
+        App.KBEditor.initEditor();
+        console.log('[App] KBEditor initialized');
+
+        // 8. Initialize Prompt Library
+        App.PromptLibrary.initImageInput();
+        App.PromptLibrary.initModalClicks();
+        await App.PromptLibrary.loadAndRender();
+        console.log('[App] PromptLibrary initialized');
+
+        // 9. Initialize Tools Dashboard
+        App.ToolsDashboard.initIconInput();
+        App.ToolsDashboard.initModalClicks();
+        await App.ToolsDashboard.loadAndRender();
+        console.log('[App] ToolsDashboard initialized');
+
+        // 10. Show ready toast
+        App.Toast.show('Dashboard ready', 'success');
+
+        console.log('[App] ✅ Application initialized successfully');
+      } catch (err) {
+        console.error('[App] Initialization error:', err);
+        App.Toast.show('Failed to initialize: ' + err.message, 'error');
+      }
+    })();
+  </script>
+
+</body>
+</html>
